@@ -42,10 +42,10 @@ expires {$attribute.content.month}/{$attribute.content.year}
     <div class="element">
     <label>Year</label>
     <select name="{$attribute_base}_ezcreditcard_year_{$attribute.id}" id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" >
-    {def $years = array('2007','2008','2009','2010','2011','2012','2013','2014','2015')}
-    {foreach $years as $year}
-    <option value="{$year}" {if $year|eq($attribute.content.year)}selected{/if}>{$year}</option>
-    {/foreach}
+    {def $year=currentdate()|datetime(custom,'%Y')}
+    {for $year to sum($year,10) as $i}
+    <option value="{$i}" {if $i|eq($attribute.content.year)}selected{/if}>{$i}</option>
+    {/for}
     </select>
     </div>
     <div class="break"></div>
