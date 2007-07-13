@@ -1,9 +1,10 @@
 <?php
-define( 'XROWRECURRINGORDER_PERIOD_DAILY', 0 );
-define( 'XROWRECURRINGORDER_PERIOD_WEEKLY', 1 );
-define( 'XROWRECURRINGORDER_PERIOD_MONTHLY', 2 );
-define( 'XROWRECURRINGORDER_PERIOD_QUARTERLY', 3 );
-define( 'XROWRECURRINGORDER_PERIOD_YEARLY', 4 );
+define( 'XROWRECURRINGORDER_PERIOD_ONETIME', 0 );
+define( 'XROWRECURRINGORDER_PERIOD_DAY', 1 );
+define( 'XROWRECURRINGORDER_PERIOD_WEEK', 2 );
+define( 'XROWRECURRINGORDER_PERIOD_MONTH', 3 );
+define( 'XROWRECURRINGORDER_PERIOD_QUARTER', 4 );
+define( 'XROWRECURRINGORDER_PERIOD_YEAR', 5 );
 
 define( 'XROWRECURRINGORDER_STATUS_DEACTIVATED', 0 );
 define( 'XROWRECURRINGORDER_STATUS_ACTIVE', 1 );
@@ -18,6 +19,7 @@ include_once( 'extension/recurringorders/classes/recurringorderitem.php');
 include_once( 'extension/recurringorders/classes/recurringorderitemoption.php');
 include_once( 'lib/ezutils/classes/ezoperationhandler.php' );
 include_once( 'kernel/shop/classes/ezshopfunctions.php' );
+
 class XROWRecurringOrderCollection extends eZPersistentObject
 {
     function XROWRecurringOrderCollection( $row )
@@ -26,7 +28,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     }
     function definition()
     {
-        return array( "fields" => array( 
+        return array( "fields" => array(
                                          "user_id" => array( 'name' => "user_id",
                                                                       'datatype' => 'integer',
                                                                       'default' => 0,
@@ -65,7 +67,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
                                                                  'required' => true ) ),
                       "keys" => array( "id" ),
                       "increment_key" => "id",
-                      "function_attributes" => array( 
+                      "function_attributes" => array(
                                                         "list" => "fetchList",
                                                         "user" => "user",
                                                         "internal_next_date" => "internalNextDate"
@@ -92,7 +94,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
             else
                 return true;
         }
-        else 
+        else
         {
             return XROWRECURRINGORDER_ERROR_CREDITCARD_MISSING;
         }
@@ -102,7 +104,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         $db = eZDB::instance();
         $date = new eZDateTime( time() );
         $date->setDay( $date->day() - $days );
-        
+
         $result = $db->arrayQuery( "SELECT count( id ) as counter FROM xrow_recurring_order_history x WHERE x.date > " . $date->timeStamp() . " and x.collection_id = " . $this->id );
         return ( $result[0]['counter'] > 0 );
     }
@@ -127,7 +129,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         $row = array( 'date' => time(), 'type' => $type, 'data_text' => $text, 'order_id' => $orderid, 'collection_id' => $this->id );
         $item = new XROWRecurringOrderHistory( $row );
         $item->store();
-        
+
         $date = new eZDateTime( time() );
         $date->setDay( $date->day() + 2 );
         $this->setAttribute( 'next_try', $date->timeStamp() );
@@ -144,13 +146,13 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     }
     function createDOMTreefromArray( $name, $array )
     {
-        
+
         $doc = new eZDOMDocument( $name );
         $root = $doc->createElementNode( $name );
         $keys = array_keys( $array );
         foreach ( $keys as $key )
         {
-            
+
             if ( is_array( $array[$key] ) )
             {
                 //TODO recursive shoudl work too
@@ -161,7 +163,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
                 $node = $doc->createElementNode( $key );
                 $node->appendChild( $doc->createTextNode( $array[$key] ) );
             }
-            
+
             $root->appendChild( $node );
             unset( $node );
         }
@@ -177,7 +179,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         {
             $time = $this->last_success;
         }
-        else 
+        else
         {
             $time = $this->created;
         }
@@ -192,7 +194,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         {
             $time = $this->last_success;
         }
-        else 
+        else
         {
             $time = $this->created;
         }
@@ -217,7 +219,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         if ( $this->attribute( 'next_date' ) < XROWRecurringOrderCollection::now() )
             return true;
         else
-            return false; 
+            return false;
     }
 
     function createOrder()
@@ -303,13 +305,13 @@ class XROWRecurringOrderCollection extends eZPersistentObject
                $user_id = eZUser::currentUserID();
         return eZPersistentObject::fetchObject( XROWRecurringOrderCollection::definition(),
                 null, array( 'user_id' => $user_id ), true );
-        
+
     }
     function fetchAll()
     {
         return eZPersistentObject::fetchObjectList( XROWRecurringOrderCollection::definition(),
                 null, null, true );
-        
+
     }
     function fetch( $collection_id )
     {
@@ -334,5 +336,97 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     {
         return XROWRecurringOrderItem::add( $this->id, $object_id, $variations, $amount );
     }
+
+    /*!
+     \static
+     fetch text array of available billing cycles
+     This can be called like XROWRecurringOrderCollection::getBillingCycleTextArray()
+    */
+    function getBillingCycleTextArray()
+    {
+        $result = array (
+            XROWRECURRINGORDER_PERIOD_ONETIME   => ezi18n( 'kernel/classes/recurringordercollection', "one time fee" ),
+            XROWRECURRINGORDER_PERIOD_DAY       => ezi18n( 'kernel/classes/recurringordercollection', "day(s)" ),
+            XROWRECURRINGORDER_PERIOD_WEEK      => ezi18n( 'kernel/classes/recurringordercollection', "weeks(s)" ),
+            XROWRECURRINGORDER_PERIOD_MONTH     => ezi18n( 'kernel/classes/recurringordercollection', "month(s)" ),
+            XROWRECURRINGORDER_PERIOD_QUARTER   => ezi18n( 'kernel/classes/recurringordercollection', "quarter(s)" ),
+            XROWRECURRINGORDER_PERIOD_YEAR      => ezi18n( 'kernel/classes/recurringordercollection', "year(s)" )
+        );
+        return $result;
+    }
+
+    /*!
+     \static
+     fetch text array of available billing cycles
+     This can be called like XROWRecurringOrderCollection::getBillingCycleTextAdjectiveArray()
+    */
+    function getBillingCycleTextAdjectiveArray()
+    {
+        $result = array (
+            XROWRECURRINGORDER_PERIOD_ONETIME   => ezi18n( 'kernel/classes/recurringordercollection', "one time fee" ),
+            XROWRECURRINGORDER_PERIOD_DAY       => ezi18n( 'kernel/classes/recurringordercollection', "daily" ),
+            XROWRECURRINGORDER_PERIOD_WEEK      => ezi18n( 'kernel/classes/recurringordercollection', "weekly" ),
+            XROWRECURRINGORDER_PERIOD_MONTH     => ezi18n( 'kernel/classes/recurringordercollection', "monthly" ),
+            XROWRECURRINGORDER_PERIOD_QUARTER   => ezi18n( 'kernel/classes/recurringordercollection', "quarterly" ),
+            XROWRECURRINGORDER_PERIOD_YEAR      => ezi18n( 'kernel/classes/recurringordercollection', "yearly" )
+        );
+        return $result;
+    }
+
+    /*!
+     \static
+     fetch description text for the given period
+     This can be called like XROWRecurringOrderCollection::getBillingCycleText( $period, $quantity )
+    */
+    function getBillingCycleText ( $period, $quantity = 0 )
+    {
+        switch ( $period )
+        {
+            case XROWRECURRINGORDER_PERIOD_ONETIME:
+            {
+                return ezi18n( 'kernel/classes/recurringordercollection', "one time fee" );
+            }break;
+            case XROWRECURRINGORDER_PERIOD_DAY:
+            {
+                if ( $quantity == 1 )
+                    return ezi18n( 'kernel/classes/recurringordercollection', "day" );
+                else
+                    return ezi18n( 'kernel/classes/recurringordercollection', "days" );
+            }break;
+            case XROWRECURRINGORDER_PERIOD_WEEK:
+            {
+                if ( $quantity == 1 )
+                    return ezi18n( 'kernel/classes/recurringordercollection', "week" );
+                else
+                    return ezi18n( 'kernel/classes/recurringordercollection', "weeks" );
+            }break;
+            case XROWRECURRINGORDER_PERIOD_MONTH:
+            {
+                if ( $quantity == 1 )
+                    return ezi18n( 'kernel/classes/recurringordercollection', "month" );
+                else
+                    return ezi18n( 'kernel/classes/recurringordercollection', "months" );
+            }break;
+            case XROWRECURRINGORDER_PERIOD_QUARTER:
+            {
+                if ( $quantity == 1 )
+                    return ezi18n( 'kernel/classes/recurringordercollection', "quarter" );
+                else
+                    return ezi18n( 'kernel/classes/recurringordercollection', "quarters" );
+            }break;
+            case XROWRECURRINGORDER_PERIOD_YEAR:
+            {
+                if ( $quantity == 1 )
+                    return ezi18n( 'kernel/classes/recurringordercollection', "year" );
+                else
+                    return ezi18n( 'kernel/classes/recurringordercollection', "years" );
+            }break;
+            default:
+            {
+                return "";
+            }
+        }
+    }
+
 }
 ?>

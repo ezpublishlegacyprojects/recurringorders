@@ -7,10 +7,10 @@ include_once( 'kernel/common/i18n.php' );
 include_once( 'lib/ezxml/classes/ezxml.php' );
 
 define( 'EZ_DATATYPESTRING_CREDITCARD', 'ezcreditcard' );
-define( 'EZ_DATATYPESTRING_MAX_LEN_FIELD', 'data_int1' );
-define( 'EZ_DATATYPESTRING_MAX_LEN_VARIABLE', '_ezstring_max_string_length_' );
-define( "EZ_DATATYPESTRING_DEFAULT_STRING_FIELD", "data_text1" );
-define( "EZ_DATATYPESTRING_DEFAULT_STRING_VARIABLE", "_ezstring_default_value_" );
+define( 'EZ_DATATYPE_CREDITCARD_MAX_LEN_FIELD', 'data_int1' );
+define( 'EZ_DATATYPE_CREDITCARD_MAX_LEN_VARIABLE', '_ezstring_max_string_length_' );
+define( "EZ_DATATYPE_CREDITCARD_DEFAULT_STRING_FIELD", "data_text1" );
+define( "EZ_DATATYPE_CREDITCARD_DEFAULT_STRING_VARIABLE", "_ezstring_default_value_" );
 
 define( 'XROWCREDITCARD_TYPE_MASTERCARD', 1 );
 define( 'XROWCREDITCARD_TYPE_VISA', 2 );
@@ -92,7 +92,7 @@ class ezcreditcardType extends eZDataType
                                                                  'Your card is expired.' ) );
             $failure = true;
         }
-        if ( !in_array( $data['type'], array( 
+        if ( !in_array( $data['type'], array(
             XROWCREDITCARD_TYPE_AMERICANEXPRESS,
             XROWCREDITCARD_TYPE_DISCOVER,
             XROWCREDITCARD_TYPE_MASTERCARD,
@@ -113,7 +113,7 @@ class ezcreditcardType extends eZDataType
             $aim->addField( 'x_type', 'AUTH_ONLY' );
             // assign card name
             $aim->addField( 'x_card_name', $data['name'] );
-            
+
             // assign card expiration date
             $aim->addField( 'x_exp_date', $time->month() . $time->year() );
 
@@ -125,7 +125,7 @@ class ezcreditcardType extends eZDataType
             {
                 // assign card security number, cvv2 code
                 $aim->addField( 'x_card_code', $data['securitycode'] );
-            }   
+            }
             $aim->addField( 'x_description', 'Authorization Check' );
             $aim->addField( 'x_cust_id', eZUser::currentUserID() );
             // get currency code
@@ -148,7 +148,7 @@ class ezcreditcardType extends eZDataType
             // send payment information to authorize.net
             $aim->sendPayment();
             $response = $aim->getResponse();
-            
+
             // Enable MD5Hash Verification
             if ( $ini->variable( 'eZAuthorizeSettings', 'MD5HashVerification' ) == 'true' )
             {
@@ -181,7 +181,7 @@ class ezcreditcardType extends eZDataType
                 $failure = true;
             }
         }
-    
+
         if ( $failure )
             return EZ_INPUT_VALIDATOR_STATE_INVALID;
         else
@@ -194,22 +194,22 @@ class ezcreditcardType extends eZDataType
     */
     function validateObjectAttributeHTTPInput( &$http, $base, &$contentObjectAttribute )
     {
-        if ( 
-              $http->hasPostVariable( $base . '_ezcreditcard_name_' . $contentObjectAttribute->attribute( 'id' ) ) and 
-              $http->hasPostVariable( $base . '_ezcreditcard_number_' . $contentObjectAttribute->attribute( 'id' ) ) and 
-              $http->hasPostVariable( $base . '_ezcreditcard_securitycode_' . $contentObjectAttribute->attribute( 'id' ) ) and 
-              $http->hasPostVariable( $base . '_ezcreditcard_month_' . $contentObjectAttribute->attribute( 'id' ) ) and 
-              $http->hasPostVariable( $base . '_ezcreditcard_year_' . $contentObjectAttribute->attribute( 'id' ) ) 
+        if (
+              $http->hasPostVariable( $base . '_ezcreditcard_name_' . $contentObjectAttribute->attribute( 'id' ) ) and
+              $http->hasPostVariable( $base . '_ezcreditcard_number_' . $contentObjectAttribute->attribute( 'id' ) ) and
+              $http->hasPostVariable( $base . '_ezcreditcard_securitycode_' . $contentObjectAttribute->attribute( 'id' ) ) and
+              $http->hasPostVariable( $base . '_ezcreditcard_month_' . $contentObjectAttribute->attribute( 'id' ) ) and
+              $http->hasPostVariable( $base . '_ezcreditcard_year_' . $contentObjectAttribute->attribute( 'id' ) )
            )
         {
-            $data = array(); 
+            $data = array();
             $data['type'] = $http->postVariable( $base . '_ezcreditcard_type_' . $contentObjectAttribute->attribute( 'id' ) );
             $data['name'] = $http->postVariable( $base . '_ezcreditcard_name_' . $contentObjectAttribute->attribute( 'id' ) );
             $data['number'] = $http->postVariable( $base . '_ezcreditcard_number_' . $contentObjectAttribute->attribute( 'id' ) );
             $data['securitycode'] = $http->postVariable( $base . '_ezcreditcard_securitycode_' . $contentObjectAttribute->attribute( 'id' ) );
             $data['month'] = $http->postVariable( $base . '_ezcreditcard_month_' . $contentObjectAttribute->attribute( 'id' ) );
             $data['year'] = $http->postVariable( $base . '_ezcreditcard_year_' . $contentObjectAttribute->attribute( 'id' ) );
-            
+
 
             $classAttribute =& $contentObjectAttribute->contentClassAttribute();
 
@@ -236,15 +236,15 @@ class ezcreditcardType extends eZDataType
     */
     function fetchObjectAttributeHTTPInput( &$http, $base, &$contentObjectAttribute )
     {
-        if ( 
-              $http->hasPostVariable( $base . '_ezcreditcard_name_' . $contentObjectAttribute->attribute( 'id' ) ) and 
-              $http->hasPostVariable( $base . '_ezcreditcard_number_' . $contentObjectAttribute->attribute( 'id' ) ) and 
-              $http->hasPostVariable( $base . '_ezcreditcard_securitycode_' . $contentObjectAttribute->attribute( 'id' ) ) and 
-              $http->hasPostVariable( $base . '_ezcreditcard_month_' . $contentObjectAttribute->attribute( 'id' ) ) and 
-              $http->hasPostVariable( $base . '_ezcreditcard_year_' . $contentObjectAttribute->attribute( 'id' ) ) 
+        if (
+              $http->hasPostVariable( $base . '_ezcreditcard_name_' . $contentObjectAttribute->attribute( 'id' ) ) and
+              $http->hasPostVariable( $base . '_ezcreditcard_number_' . $contentObjectAttribute->attribute( 'id' ) ) and
+              $http->hasPostVariable( $base . '_ezcreditcard_securitycode_' . $contentObjectAttribute->attribute( 'id' ) ) and
+              $http->hasPostVariable( $base . '_ezcreditcard_month_' . $contentObjectAttribute->attribute( 'id' ) ) and
+              $http->hasPostVariable( $base . '_ezcreditcard_year_' . $contentObjectAttribute->attribute( 'id' ) )
            )
         {
-            $data = array(); 
+            $data = array();
             $data['type'] = $http->postVariable( $base . '_ezcreditcard_type_' . $contentObjectAttribute->attribute( 'id' ) );
             $data['name'] = $http->postVariable( $base . '_ezcreditcard_name_' . $contentObjectAttribute->attribute( 'id' ) );
             $data['number'] = $http->postVariable( $base . '_ezcreditcard_number_' . $contentObjectAttribute->attribute( 'id' ) );
@@ -309,18 +309,18 @@ class ezcreditcardType extends eZDataType
     */
     function fetchClassAttributeHTTPInput( &$http, $base, &$classAttribute )
     {
-        $maxLenName = $base . EZ_DATATYPESTRING_MAX_LEN_VARIABLE . $classAttribute->attribute( 'id' );
-        $defaultValueName = $base . EZ_DATATYPESTRING_DEFAULT_STRING_VARIABLE . $classAttribute->attribute( 'id' );
+        $maxLenName = $base . EZ_DATATYPE_CREDITCARD_MAX_LEN_VARIABLE . $classAttribute->attribute( 'id' );
+        $defaultValueName = $base . EZ_DATATYPE_CREDITCARD_DEFAULT_STRING_VARIABLE . $classAttribute->attribute( 'id' );
         if ( $http->hasPostVariable( $maxLenName ) )
         {
             $maxLenValue = $http->postVariable( $maxLenName );
-            $classAttribute->setAttribute( EZ_DATATYPESTRING_MAX_LEN_FIELD, $maxLenValue );
+            $classAttribute->setAttribute( EZ_DATATYPE_CREDITCARD_MAX_LEN_FIELD, $maxLenValue );
         }
         if ( $http->hasPostVariable( $defaultValueName ) )
         {
             $defaultValueValue = $http->postVariable( $defaultValueName );
 
-            $classAttribute->setAttribute( EZ_DATATYPESTRING_DEFAULT_STRING_FIELD, $defaultValueValue );
+            $classAttribute->setAttribute( EZ_DATATYPE_CREDITCARD_DEFAULT_STRING_FIELD, $defaultValueValue );
         }
         return true;
     }
@@ -410,7 +410,7 @@ class ezcreditcardType extends eZDataType
     }
     function createDOMTreefromArray( $name, $array )
     {
-        
+
         $doc = new eZDOMDocument( $name );
         $root = $doc->createElementNode( $name );
         $keys = array_keys( $array );
@@ -426,7 +426,7 @@ class ezcreditcardType extends eZDataType
                 $node = $doc->createElementNode( $key );
                 $node->appendChild( $doc->createTextNode( $array[$key] ) );
             }
-            
+
             $root->appendChild( $node );
             unset( $node );
         }
