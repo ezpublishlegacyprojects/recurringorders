@@ -10,7 +10,7 @@
 
 */
 
-include_once( 'extension/recurringorders/classes/recurringordercollection.php' );
+include_once( eZExtension::baseDirectory() . '/recurringorders/classes/recurringordercollection.php' );
 
 class xrowBillingCycle
 {

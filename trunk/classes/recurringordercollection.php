@@ -344,15 +344,18 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     */
     function getBillingCycleTextArray()
     {
-        $result = array (
-            XROWRECURRINGORDER_PERIOD_ONETIME   => ezi18n( 'kernel/classes/recurringordercollection', "one time fee" ),
-            XROWRECURRINGORDER_PERIOD_DAY       => ezi18n( 'kernel/classes/recurringordercollection', "day(s)" ),
-            XROWRECURRINGORDER_PERIOD_WEEK      => ezi18n( 'kernel/classes/recurringordercollection', "weeks(s)" ),
-            XROWRECURRINGORDER_PERIOD_MONTH     => ezi18n( 'kernel/classes/recurringordercollection', "month(s)" ),
-            XROWRECURRINGORDER_PERIOD_QUARTER   => ezi18n( 'kernel/classes/recurringordercollection', "quarter(s)" ),
-            XROWRECURRINGORDER_PERIOD_YEAR      => ezi18n( 'kernel/classes/recurringordercollection', "year(s)" )
-        );
-        return $result;
+        if ( !isset( $GLOBALS['xrowBillingCycleTextArray'] ) )
+        {
+            $GLOBALS['xrowBillingCycleTextArray'] = array (
+                XROWRECURRINGORDER_PERIOD_ONETIME   => ezi18n( 'kernel/classes/recurringordercollection', "one time fee" ),
+                XROWRECURRINGORDER_PERIOD_DAY       => ezi18n( 'kernel/classes/recurringordercollection', "day(s)" ),
+                XROWRECURRINGORDER_PERIOD_WEEK      => ezi18n( 'kernel/classes/recurringordercollection', "weeks(s)" ),
+                XROWRECURRINGORDER_PERIOD_MONTH     => ezi18n( 'kernel/classes/recurringordercollection', "month(s)" ),
+                XROWRECURRINGORDER_PERIOD_QUARTER   => ezi18n( 'kernel/classes/recurringordercollection', "quarter(s)" ),
+                XROWRECURRINGORDER_PERIOD_YEAR      => ezi18n( 'kernel/classes/recurringordercollection', "year(s)" )
+                );
+        }
+        return $GLOBALS['xrowBillingCycleTextArray'];
     }
 
     /*!
@@ -362,15 +365,18 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     */
     function getBillingCycleTextAdjectiveArray()
     {
-        $result = array (
-            XROWRECURRINGORDER_PERIOD_ONETIME   => ezi18n( 'kernel/classes/recurringordercollection', "one time fee" ),
-            XROWRECURRINGORDER_PERIOD_DAY       => ezi18n( 'kernel/classes/recurringordercollection', "daily" ),
-            XROWRECURRINGORDER_PERIOD_WEEK      => ezi18n( 'kernel/classes/recurringordercollection', "weekly" ),
-            XROWRECURRINGORDER_PERIOD_MONTH     => ezi18n( 'kernel/classes/recurringordercollection', "monthly" ),
-            XROWRECURRINGORDER_PERIOD_QUARTER   => ezi18n( 'kernel/classes/recurringordercollection', "quarterly" ),
-            XROWRECURRINGORDER_PERIOD_YEAR      => ezi18n( 'kernel/classes/recurringordercollection', "yearly" )
-        );
-        return $result;
+        if ( !isset( $GLOBALS['xrowBillingCycleTextAdjectiveArray'] ) )
+        {
+            $GLOBALS['xrowBillingCycleTextAdjectiveArray'] = array (
+                    XROWRECURRINGORDER_PERIOD_ONETIME   => ezi18n( 'kernel/classes/recurringordercollection', "one time fee" ),
+                    XROWRECURRINGORDER_PERIOD_DAY       => ezi18n( 'kernel/classes/recurringordercollection', "daily" ),
+                    XROWRECURRINGORDER_PERIOD_WEEK      => ezi18n( 'kernel/classes/recurringordercollection', "weekly" ),
+                    XROWRECURRINGORDER_PERIOD_MONTH     => ezi18n( 'kernel/classes/recurringordercollection', "monthly" ),
+                    XROWRECURRINGORDER_PERIOD_QUARTER   => ezi18n( 'kernel/classes/recurringordercollection', "quarterly" ),
+                    XROWRECURRINGORDER_PERIOD_YEAR      => ezi18n( 'kernel/classes/recurringordercollection', "yearly" )
+                );
+        }
+        return $GLOBALS['xrowBillingCycleTextAdjectiveArray'];
     }
 
     /*!
@@ -380,52 +386,39 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     */
     function getBillingCycleText ( $period, $quantity = 0 )
     {
-        switch ( $period )
+
+        if ( !isset( $GLOBALS['xrowBillingCycleText'] ) )
         {
-            case XROWRECURRINGORDER_PERIOD_ONETIME:
-            {
-                return ezi18n( 'kernel/classes/recurringordercollection', "one time fee" );
-            }break;
-            case XROWRECURRINGORDER_PERIOD_DAY:
-            {
-                if ( $quantity == 1 )
-                    return ezi18n( 'kernel/classes/recurringordercollection', "day" );
-                else
-                    return ezi18n( 'kernel/classes/recurringordercollection', "days" );
-            }break;
-            case XROWRECURRINGORDER_PERIOD_WEEK:
-            {
-                if ( $quantity == 1 )
-                    return ezi18n( 'kernel/classes/recurringordercollection', "week" );
-                else
-                    return ezi18n( 'kernel/classes/recurringordercollection', "weeks" );
-            }break;
-            case XROWRECURRINGORDER_PERIOD_MONTH:
-            {
-                if ( $quantity == 1 )
-                    return ezi18n( 'kernel/classes/recurringordercollection', "month" );
-                else
-                    return ezi18n( 'kernel/classes/recurringordercollection', "months" );
-            }break;
-            case XROWRECURRINGORDER_PERIOD_QUARTER:
-            {
-                if ( $quantity == 1 )
-                    return ezi18n( 'kernel/classes/recurringordercollection', "quarter" );
-                else
-                    return ezi18n( 'kernel/classes/recurringordercollection', "quarters" );
-            }break;
-            case XROWRECURRINGORDER_PERIOD_YEAR:
-            {
-                if ( $quantity == 1 )
-                    return ezi18n( 'kernel/classes/recurringordercollection', "year" );
-                else
-                    return ezi18n( 'kernel/classes/recurringordercollection', "years" );
-            }break;
-            default:
-            {
-                return "";
-            }
+            $GLOBALS['xrowBillingCycleText'] = array (
+                XROWRECURRINGORDER_PERIOD_ONETIME   => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "one time fee" ),
+                                                               1 => ezi18n( 'kernel/classes/recurringordercollection', "one time fee" ) ),
+                XROWRECURRINGORDER_PERIOD_DAY       => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "days" ),
+                                                               1 => ezi18n( 'kernel/classes/recurringordercollection', "day" ) ),
+                XROWRECURRINGORDER_PERIOD_WEEK      => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "weeks" ),
+                                                               1 => ezi18n( 'kernel/classes/recurringordercollection', "week" ) ),
+                XROWRECURRINGORDER_PERIOD_MONTH     => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "months" ),
+                                                               1 => ezi18n( 'kernel/classes/recurringordercollection', "month" ) ),
+                XROWRECURRINGORDER_PERIOD_QUARTER   => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "quarters" ),
+                                                               1 => ezi18n( 'kernel/classes/recurringordercollection', "quarter" ) ),
+                XROWRECURRINGORDER_PERIOD_YEAR      => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "years" ),
+                                                               1 => ezi18n( 'kernel/classes/recurringordercollection', "year" ) )
+
+            );
         }
+
+        if ( $quantity == 1 )
+        {
+            if ( isset( $GLOBALS['xrowBillingCycleText'][$period][1] ) )
+                return $GLOBALS['xrowBillingCycleText'][$period][1];
+        }
+        else
+        {
+            if ( isset( $GLOBALS['xrowBillingCycleText'][$period][0] ) )
+                return $GLOBALS['xrowBillingCycleText'][$period][0];
+        }
+
+        return '';
+
     }
 
 }

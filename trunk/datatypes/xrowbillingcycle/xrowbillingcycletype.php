@@ -23,7 +23,7 @@ class xrowBillingCycleType extends eZDataType
     {
         $this->eZDataType( EZ_DATATYPESTRING_XROWBILLINGCYCLE, ezi18n( 'kernel/classes/datatypes', "Billing cycle", 'Datatype name' ),
                            array( 'serialize_supported' => true,
-                                  'object_serialize_map' => array( 'data_int' => 'value' ) ) );
+                                  'object_serialize_map' => array( 'data_int' => 'period', 'data_text' => 'quantity' ) ) );
     }
 
     /*!
@@ -158,10 +158,12 @@ class xrowBillingCycleType extends eZDataType
     }
 
     /*!
-     Does nothing, the data is already present in the attribute.
+     Clears cache
     */
     function storeObjectAttribute( &$object_attribute )
     {
+        if ( isset( $GLOBALS['xrowBillingCycleCache'][$contentObjectAttribute->ContentObjectID][$contentObjectAttribute->Version] ) )
+            unset( $GLOBALS['xrowBillingCycleCache'][$contentObjectAttribute->ContentObjectID][$contentObjectAttribute->Version] );
     }
 
     function storeClassAttribute( &$attribute, $version )
@@ -173,6 +175,11 @@ class xrowBillingCycleType extends eZDataType
     */
     function &objectAttributeContent( &$contentObjectAttribute )
     {
+        if ( isset( $GLOBALS['xrowBillingCycleCache'][$contentObjectAttribute->ContentObjectID][$contentObjectAttribute->Version] ) )
+        {
+              return $GLOBALS['xrowBillingCycleCache'][$contentObjectAttribute->ContentObjectID][$contentObjectAttribute->Version];
+        }
+        else
         $period     = $contentObjectAttribute->attribute( "data_int" );
         $quantity   = $contentObjectAttribute->attribute( "data_text" );
         $content    = new xrowBillingCycle ( $period, $quantity );
