@@ -299,9 +299,9 @@ class ezcreditcardType extends eZDataType
     */
     function &objectAttributeContent( &$contentObjectAttribute )
     {
-        if ( isset( $GLOBALS['eZCreditcardCache'][$contentObjectAttribute->ContentObjectID][$contentObjectAttribute->Version] ) )
+        if ( isset( $GLOBALS['eZCreditcardCache'][$contentObjectAttribute->ID][$contentObjectAttribute->Version] ) )
         {
-              return $GLOBALS['eZCreditcardCache'][$contentObjectAttribute->ContentObjectID][$contentObjectAttribute->Version];
+              return $GLOBALS['eZCreditcardCache'][$contentObjectAttribute->ID][$contentObjectAttribute->Version];
         }
         else
         {
@@ -325,9 +325,7 @@ class ezcreditcardType extends eZDataType
             if ( isset( $content['bankcode'] ) )
                 $content['bankcode'] = ezcreditcardType::gpgDecode( $content['bankcode'] );
 
-            $GLOBALS['eZCreditcardCache'][$contentObjectAttribute->ContentObjectID][$contentObjectAttribute->Version] = $content;
-
-            eZDebug::writeDebug( $content, 'content' );
+            $GLOBALS['eZCreditcardCache'][$contentObjectAttribute->ID][$contentObjectAttribute->Version] = $content;
 
             return $content;
         }
