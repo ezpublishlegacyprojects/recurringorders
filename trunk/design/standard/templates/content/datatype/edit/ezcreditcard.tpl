@@ -22,8 +22,9 @@
 
 {default attribute_base='ContentObjectAttribute'
          html_class='full'}
-
+<div class="block">
 {if $attribute.content.has_stored_card}
+
     <p>
         <label>{"Current stored card"|i18n('design/standard/content/datatype')}</label>
        {$types[$attribute.content.type]|wash}
@@ -92,7 +93,7 @@
             <div class="break"></div>
         </div>
     </div>
-    <div id="ro-ectype-{$attribute.id}"{if $attribute.content.type|ne(5)} style="display: none;"{/if}>
+    <div id="ro-ectype-{$attribute.id}"{if or( is_null($attribute.content.type), $attribute.content.type|ne(5))} style="display: none;"{/if}>
          <label>{'Name of account'|i18n( 'design/standard/content/datatype' )}:</label>
         <input maxlength="27" id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" type="text" size="70" name="{$attribute_base}_ezcreditcard_ecname_{$attribute.id}" value="{$attribute.content.ecname|wash( xhtml )}" />
         <label>{'Account number'|i18n( 'design/standard/content/datatype' )}</label>
@@ -102,6 +103,6 @@
 
     </div>
 {/if}
-
+</div>
 {/default}
 
