@@ -21,7 +21,35 @@ class XROWRecurringOrderItem extends eZPersistentObject
                                                                       'datatype' => 'integer',
                                                                       'default' => 0,
                                                                       'required' => true ),
-                                         "date" => array( 'name' => "date",
+                                         "cycle" => array( 'name' => "cycle",
+                                                                   'datatype' => 'integer',
+                                                                   'default' => 1,
+                                                                   'required' => true ),
+                                         "cycle_unit" => array( 'name' => "cycle_unit",
+                                                                   'datatype' => 'integer',
+                                                                   'default' => XROWRECURRINGORDER_CYCLE_MONTH,
+                                                                   'required' => true ),
+                                         "is_subscription" => array( 'name' => "is_subscription",
+                                                             'datatype' => 'integer',
+                                                             'default' => 0,
+                                                             'required' => true ),
+                                         "subscription_handler" => array( 'name' => "subscription_handler",
+                                                             'datatype' => 'string',
+                                                             'default' => null,
+                                                             'required' => true ),
+                                         "last_success" => array( 'name' => "last_success",
+                                                             'datatype' => 'integer',
+                                                             'default' => 0,
+                                                             'required' => true ),
+                                         "order_date" => array( 'name' => "order_date",
+                                                                   'datatype' => 'integer',
+                                                                   'default' => null,
+                                                                   'required' => true ),
+                                         "next_date" => array( 'name' => "next_date",
+                                                             'datatype' => 'integer',
+                                                             'default' => 0,
+                                                             'required' => true ),
+                                         "created" => array( 'name' => "created",
                                                                    'datatype' => 'integer',
                                                                    'default' => time(),
                                                                    'required' => true ),
@@ -31,15 +59,189 @@ class XROWRecurringOrderItem extends eZPersistentObject
                                                                  'required' => true ) ),
                       "keys" => array( "item_id" ),
                       "increment_key" => "item_id",
-                      "function_attributes" => array( 
+                      "function_attributes" => array(
+                                                        "collection" => "collection", 
                                                         "object" => "object",
+                                                        'days_in_cycle' => 'daysInCycle',
                                                         "price_per_item" => "pricePerItem",
                                                         "price" => "price",
+                                                        "real_next_order_date" => "realNextOrderDate",
+                                                        'order_date_object' => 'orderDateObject',
                                                         "options" => "options"
                                                      ),
                       "class_name" => "XROWRecurringOrderItem",
-                      "sort" => array( "date" => "asc" ),
+                      "sort" => array( "created" => "asc" ),
                       "name" => "xrow_recurring_order_item" );
+    }
+    function store()
+    {
+    	$this->setAttribute( 'next_date', $this->nextDate() );
+    	parent::store();
+    }
+    function &orderDateObject()
+    {
+    	$return = new eZDateTime( $this->order_date );
+    	return $return;
+    }
+    function realNextOrderDate()
+    {
+    	return $this->next_date + $this->order_date;
+    }
+    function collection()
+    {
+    	return XROWRecurringOrderCollection::fetch( $this->collection_id );
+    }
+    function &attribute( $name )
+    {
+        switch ( $name )
+        {
+            case 'last_run':
+                $c = $this->attribute( 'collection' );
+                $return = $c->attribute( 'last_run' );
+            break;
+            default:
+                $return = parent::attribute( $name );
+            break;
+        }
+        return $return;
+    }
+    function &setAttribute( $name, $value )
+    {
+        switch ( $name )
+        {
+            case 'cycle_unit':
+            case 'cycle':
+            case 'order_date':
+            case 'last_success':
+                parent::setAttribute( $name, $value );
+                $this->setAttribute( 'next_date', $this->nextDate() );
+            break;
+            default:
+                $return = parent::setAttribute( $name, $value );
+            break;
+        }
+        return $return;
+    }
+    function forwardNextDate( $toTime )
+    {
+        if ( $this->last_success )
+            $nextdate = $this->attribute( 'last_success' );
+        else
+            $nextdate = $this->attribute( 'created' );
+    	while( $toTime > $nextdate )
+    	{
+    	    $nextdate = $this->nextDateHelper( $nextdate );
+    	}
+    	return $nextdate;
+    }
+    function nextDate()
+    {
+        /*
+        if ( $this->attribute( 'last_run') > $this->attribute( 'next_date') )
+        {
+            $result = $this->forwardNextDate( $this->attribute( 'last_run') );
+        }
+        
+        if ( $this->last_success )
+        {
+            $time = $this->last_success;
+            $result = $this->nextDateHelper( $time );
+        }
+        else
+        {
+            $time = $this->created;
+            $result = $this->nextDateHelper( $time );
+        }
+
+        if ( $this->attribute( 'next_date') < XROWRecurringOrderCollection::now() )
+            $result = $this->forwardNextDate( XROWRecurringOrderCollection::now() );
+        */
+        return $this->forwardNextDate( XROWRecurringOrderCollection::now() );
+    }
+    function daysInCycle()
+    {
+    	if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_DAY )
+        {
+            $amount = $this->cycle;
+        }
+        else if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_WEEK )
+        {
+            $amount = $this->cycle * 7;
+        }
+        else if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_MONTH )
+        {
+            $amount = $this->cycle * 30;
+        }
+        else if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_QUARTER )
+        {
+            $amount = $this->cycle * 30 * 3;
+        }
+        else if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_YEAR )
+        {
+            $amount = $this->cycle * 30 * 3 * 4;
+        }
+        for ( $i = 1; $i <= $amount; $i++)
+        {
+            $days[$i-1] = $i; 
+        }
+        return $days;
+    }
+    function nextDateHelper( $time )
+    {
+        if ( $this->is_subscription && $this->order_date === null )
+        {
+            return XROWRecurringOrderCollection::now();
+        }
+        $datetime = new eZDateTime( $time );
+        if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_MONTH )
+        {
+            if ( !$this->is_subscription )
+            {
+                $datetime->setMonth( $datetime->month() + $this->cycle );
+                $datetime->setDay( $datetime->day() );
+            }
+        }
+        else if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_DAY )
+        {
+            if ( !$this->is_subscription )
+            {
+                $datetime->setMonth( $datetime->month() );
+                $datetime->setDay( $datetime->day() + $this->cycle );
+            }
+        }
+        else if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_WEEK )
+        {
+            if ( !$this->is_subscription )
+            {
+                $datetime->setMonth( $datetime->month() );
+                $datetime->setDay( $datetime->day() + ( $this->cycle * 7 ) );
+            }
+        }
+        else if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_QUARTER )
+        {
+            if ( !$this->is_subscription )
+            {
+                $datetime->setMonth( $datetime->month() + ( $this->cycle * 3 ) );
+                $datetime->setDay( $datetime->day() );
+            }
+        }
+        else if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_YEAR )
+        {
+            if ( !$this->is_subscription )
+            {
+                $datetime->setYear( $datetime->year() +  $this->cycle );
+                $datetime->setMonth( $datetime->month() );
+                $datetime->setDay( $datetime->day() );
+            }
+        }
+        return $datetime->timeStamp();
+    }
+    function isDue()
+    {
+        if ( $this->realNextOrderDate() < XROWRecurringOrderCollection::now() )
+            return true;
+        else
+            return false;
     }
     function &object()
     {
@@ -57,6 +259,7 @@ class XROWRecurringOrderItem extends eZPersistentObject
     }
     function pricePerItem()
     {
+        $currency = eZShopFunctions::preferredCurrencyCode();
         $object = $this->attribute( 'object' );
         $attributes = $object->contentObjectAttributes();
 
@@ -107,24 +310,19 @@ class XROWRecurringOrderItem extends eZPersistentObject
         }
         parent::remove();
     }
-    function add( $collection_id, $object_id, $variations = null, $amount )
+    function add( $collection_id, $object_id, $variations = null, $amount, $cycle = 1, $cycle_unit = XROWRECURRINGORDER_CYCLE_MONTH )
     {
-        if ( !$amount )
+        
+        if ( !$amount ) // else we need a subscription handler
             return false;
 
-        $item = new XROWRecurringOrderItem( array( 'collection_id' => $collection_id, 'user_id' => eZUser::currentUserID(), 'contentobject_id' => $object_id, 'amount' => $amount ) );
+        $item = new XROWRecurringOrderItem( array( 'cycle' => $cycle, 'order_date' => 0, 'cycle_unit' => $cycle_unit, 'created' => XROWRecurringOrderCollection::now(), 'collection_id' => $collection_id, 'user_id' => eZUser::currentUserID(), 'contentobject_id' => $object_id, 'amount' => $amount ) );
         $item->store();
         foreach ( $variations as $variation_id => $option_id )
         {
             $option = new XROWRecurringOrderItemOption( array( 'item_id' => $item->item_id, 'variation_id' => $variation_id, 'option_id' => $option_id ) );
             $option->store();
         }
-    }
-    function store()
-    {
-        if ( $this->attribute( 'date' ) === null )
-            $this->setAttribute( 'date', time() );
-        parent::store();
     }
     function fetchByUser( $user_id = null )
     {

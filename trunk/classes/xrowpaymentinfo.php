@@ -35,10 +35,11 @@ class xrowPaymentInfo
         $result = array();
         foreach ( $gatewayArray as $gateway )
         {
-            if ( file_exists( eZExtension::baseDirectory() . '/' . $gateway['value'] . '/classes/' . $gateway['value'] . 'info.php' ) )
+            $gatewayext = strtolower( $gateway['value'] );
+            if ( file_exists( eZExtension::baseDirectory() . '/' . $gatewayext . '/classes/' . $gatewayext . 'info.php' ) )
             {
                 $result[$gateway['value']] = $gateway;
-                include_once( eZExtension::baseDirectory() . '/' . $gateway['value'] . '/classes/' . $gateway['value'] . 'info.php' );
+                include_once( eZExtension::baseDirectory() . '/' . $gatewayext . '/classes/' . $gatewayext . 'info.php' );
                 $className = $gateway['value'] . 'Info';
                 $GLOBALS['xrowPaymentInfoClasses'][$gateway['value']] = new $className();
             }

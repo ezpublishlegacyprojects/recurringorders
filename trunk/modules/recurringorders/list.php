@@ -29,15 +29,23 @@ if ( $Module->isCurrentAction( 'Remove' ) and $Module->hasActionParameter( 'Remo
 }
 if ( $Module->isCurrentAction( 'Update' ) and $Module->hasActionParameter( 'ItemArray' ) )
 {
-    foreach ( $Module->actionParameter( 'ItemArray' ) as $item_id => $amount )
+    foreach ( $Module->actionParameter( 'ItemArray' ) as $item_id => $settings )
     {
         $item = XROWRecurringOrderItem::fetch( $item_id );
-        $item->setAttribute( 'amount', $amount );
+        $datetime = $item->orderDateObject();
+        if ( $settings['order_date']['day'] >= 0 )
+        {
+            $datetime->setDay( (int)$settings['order_date']['day'] );
+        }
+        $item->setAttribute( 'order_date', $datetime->timeStamp() );
+        $item->setAttribute( 'cycle_unit', (int)$settings['cycle_unit'] );
+        if( $settings['cycle'] > 0 )
+            $item->setAttribute( 'cycle', (int)$settings['cycle'] );
+        else
+            $item->setAttribute( 'cycle', 1 );
+        $item->setAttribute( 'amount', (int)$settings['amount'] );
+
         $item->store();
-    }
-    if ( $Module->actionParameter( 'SendDay' ) )
-    {
-        $collection->setAttribute( 'send_day', $Module->actionParameter( 'SendDay' ) );
     }
     if ( $Module->actionParameter( 'Pause' ) )
     {
@@ -53,12 +61,8 @@ if ( $Module->isCurrentAction( 'Cancel' ) )
 {
     return $Module->redirectTo( $http->sessionVariable( "RedirectURI" ));
 }
-for ( $i = 1; $i <= 31; $i++)
-{
-    $days[] = $i; 
-}
+
 $tpl->setVariable( 'collection', $collection );
-$tpl->setVariable( 'days', $days );
 $Result = array();
 
 $Result['left_menu'] = "design:parts/ezadmin/menu.tpl";

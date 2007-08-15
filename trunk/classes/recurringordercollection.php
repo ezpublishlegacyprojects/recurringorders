@@ -1,16 +1,17 @@
 <?php
-define( 'XROWRECURRINGORDER_PERIOD_ONETIME', 0 );
-define( 'XROWRECURRINGORDER_PERIOD_DAY', 1 );
-define( 'XROWRECURRINGORDER_PERIOD_WEEK', 2 );
-define( 'XROWRECURRINGORDER_PERIOD_MONTH', 3 );
-define( 'XROWRECURRINGORDER_PERIOD_QUARTER', 4 );
-define( 'XROWRECURRINGORDER_PERIOD_YEAR', 5 );
+define( 'XROWRECURRINGORDER_CYCLE_ONETIME', 0 );
+define( 'XROWRECURRINGORDER_CYCLE_DAY', 1 );
+define( 'XROWRECURRINGORDER_CYCLE_WEEK', 2 );
+define( 'XROWRECURRINGORDER_CYCLE_MONTH', 3 );
+define( 'XROWRECURRINGORDER_CYCLE_QUARTER', 4 );
+define( 'XROWRECURRINGORDER_CYCLE_YEAR', 5 );
 
 define( 'XROWRECURRINGORDER_STATUS_DEACTIVATED', 0 );
 define( 'XROWRECURRINGORDER_STATUS_ACTIVE', 1 );
 
 define( 'XROWRECURRINGORDER_STATUSTYPE_SUCCESS', 1 );
 define( 'XROWRECURRINGORDER_STATUSTYPE_CREDITCARD_EXPIRES', 2 );
+define( 'XROWRECURRINGORDER_STATUSTYPE_FAILURE', 2 );
 include_once( "kernel/classes/ezpersistentobject.php" );
 
 include_once('lib/ezlocale/classes/ezdatetime.php');
@@ -39,36 +40,25 @@ class XROWRecurringOrderCollection extends eZPersistentObject
                                                                       'required' => true ),
                                          "status" => array( 'name' => "status",
                                                              'datatype' => 'integer',
-                                                             'default' => XROWRECURRINGORDER_STATUS_DEACTIVATED,
+                                                             'default' => XROWRECURRINGORDER_STATUS_ACTIVE,
                                                              'required' => true ),
                                          "created" => array( 'name' => "created",
                                                              'datatype' => 'integer',
                                                              'default' => 0,
                                                              'required' => true ),
-                                         "last_success" => array( 'name' => "last_success",
+                                         "last_run" => array('name' => "last_run",
                                                              'datatype' => 'integer',
-                                                             'default' => 0,
-                                                             'required' => true ),
-                                         "next_date" => array( 'name' => "next_date",
-                                                             'datatype' => 'integer',
-                                                             'default' => 0,
-                                                             'required' => true ),
+                                                             'default' => null,
+                                                             'required' => false ),
                                          "next_try" => array( 'name' => "next_try",
                                                              'datatype' => 'integer',
                                                              'default' => 0,
-                                                             'required' => true ),
-                                         "send_day" => array( 'name' => "send_day",
-                                                                   'datatype' => 'integer',
-                                                                   'default' => XROWRecurringOrderCollection::now(),
-                                                                   'required' => true ),
-                                         'period' => array( 'name' => "period",
-                                                                 'datatype' => 'integer',
-                                                                 'default' => XROWRECURRINGORDER_PERIOD_MONTHLY,
-                                                                 'required' => true ) ),
+                                                             'required' => true ) ),
                       "keys" => array( "id" ),
                       "increment_key" => "id",
                       "function_attributes" => array(
                                                         "list" => "fetchList",
+                                                        'now' => 'now',
                                                         "user" => "user",
                                                         "internal_next_date" => "internalNextDate"
                                                      ),
@@ -76,15 +66,26 @@ class XROWRecurringOrderCollection extends eZPersistentObject
                       "sort" => array( "id" => "asc" ),
                       "name" => "xrow_recurring_order_collection" );
     }
+    function markRun()
+    {
+    	$this->setAttribute( 'last_run', XROWRecurringOrderCollection::now() );
+    	$this->store();
+    }
+    function getAllCycleTypes()
+    {
+    	return array( XROWRECURRINGORDER_CYCLE_ONETIME, XROWRECURRINGORDER_CYCLE_DAY, XROWRECURRINGORDER_CYCLE_WEEK, XROWRECURRINGORDER_CYCLE_MONTH,XROWRECURRINGORDER_CYCLE_QUARTER,XROWRECURRINGORDER_CYCLE_YEAR);
+    }
     function checkCreditCard()
     {
         $user = $this->attribute( 'user' );
+        if ( !is_object( $user ) )
+            return false;
         $userco = $user->attribute( 'contentobject' );
         $dm = $userco->attribute( 'data_map' );
         $data = $dm['creditcard']->attribute( 'content' );
         if ( $data['month'] and $data['year'] )
         {
-            $now = new eZDateTime( time() );
+            $now = new eZDateTime( mktime() );
             $now->setMonth( $now->month() + 3 );
             $date = eZDateTime::create( -1, -1, -1, $data['month'], -1, $data['year'] );
             if ( !$date->isGreaterThan( $now ) )
@@ -102,7 +103,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     function hadErrorSince( $days )
     {
         $db = eZDB::instance();
-        $date = new eZDateTime( time() );
+        $date = new eZDateTime( mktime() );
         $date->setDay( $date->day() - $days );
 
         $result = $db->arrayQuery( "SELECT count( id ) as counter FROM xrow_recurring_order_history x WHERE x.date > " . $date->timeStamp() . " and x.collection_id = " . $this->id );
@@ -119,26 +120,10 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     }
     function canTry()
     {
-        if ( (int)$this->next_try < time() )
+        if ( (int)$this->next_try < mktime() )
             return true;
         else
             return false;
-    }
-    function history( $type = XROWRECURRINGORDER_STATUSTYPE_SUCCESS, $orderid = null, $text = null )
-    {
-        $row = array( 'date' => time(), 'type' => $type, 'data_text' => $text, 'order_id' => $orderid, 'collection_id' => $this->id );
-        $item = new XROWRecurringOrderHistory( $row );
-        $item->store();
-
-        $date = new eZDateTime( time() );
-        $date->setDay( $date->day() + 2 );
-        $this->setAttribute( 'next_try', $date->timeStamp() );
-        if ( $this->failuresSinceLastSuccess() >= 3 )
-        {
-            $this->setAttribute( 'status', XROWRECURRINGORDER_STATUS_DEACTIVATED );
-            // TODO send mail to user
-        }
-        $this->store();
     }
     function &user()
     {
@@ -169,61 +154,18 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         }
         return $root;
     }
+    // function needed for testing mod_fcgid does restart with a future date.
     function now()
     {
-        return time();
-    }
-    function nextDate( )
-    {
-        if ( $this->last_success )
-        {
-            $time = $this->last_success;
-        }
-        else
-        {
-            $time = $this->created;
-        }
-        $result = $this->nextDateHelper( $time );
-        if ( $result < XROWRecurringOrderCollection::now() )
-            $result = $this->nextDateHelper( XROWRecurringOrderCollection::now() );
-        return $result;
-    }
-    function internalNextDate( )
-    {
-        if ( $this->last_success )
-        {
-            $time = $this->last_success;
-        }
-        else
-        {
-            $time = $this->created;
-        }
-        $result = $this->nextDateHelper( $time );
-        return $result;
-    }
-    function nextDateHelper( $time )
-    {
-        $datetime = new eZDateTime( $time );
-        if ( $this->period == XROWRECURRINGORDER_PERIOD_MONTHLY )
-        {
-            $datetime->setMonth( $datetime->month() + 1 );
-        }
-        $datetime->setDay( $this->send_day );
-        $datetime->setSecond( 0 );
-        $datetime->setMinute( 0 );
-        $datetime->setHour( 0 );
-        return $datetime->timeStamp();
-    }
-    function isDue()
-    {
-        if ( $this->attribute( 'next_date' ) < XROWRecurringOrderCollection::now() )
-            return true;
-        else
-            return false;
+        #return 1189002190;<br />
+        return gmmktime( 0,0,0,9,30,2007 );
+        #return gmmktime( 0,0,0 );
     }
 
-    function createOrder()
+    function createOrder( $recurringitemlist )
     {
+        if ( count( $recurringitemlist ) == 0 )
+            return false;
         include_once( "kernel/classes/ezbasket.php" );
         include_once( "kernel/classes/ezvattype.php" );
         include_once( "kernel/classes/ezorder.php" );
@@ -234,11 +176,11 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         $productCollection = eZProductCollection::create();
         $productCollection->store();
         $productCollectionID = $productCollection->attribute( 'id' );
-        $recurringitemlist = $this->fetchList();
+
         foreach ( $recurringitemlist as $recurringitem )
         {
             $object = $recurringitem->attribute( 'object' );
-                    $attributes = $object->contentObjectAttributes();
+            $attributes = $object->contentObjectAttributes();
 
             $priceFound = false;
 
@@ -318,6 +260,25 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     	return eZPersistentObject::fetchObject( XROWRecurringOrderCollection::definition(),
                 null, array( "id" => $collection_id ), true );
     }
+    function fetchDueList()
+    {
+        $list = eZPersistentObject::fetchObjectList( XROWRecurringOrderItem::definition(),
+                null, array( 'collection_id' => $this->id ), true );
+        $result = array();
+        foreach ( $list as $item )
+        {
+            if ( $item->isDue() )
+                $result[] = $item;
+        }
+        return $result;
+    }
+    function isDue()
+    {
+    	if ( count( $this->fetchDueList() ) > 0 )
+    	   return true;
+    	else 
+    	   return false;
+    }
     function fetchList()
     {
         return eZPersistentObject::fetchObjectList( XROWRecurringOrderItem::definition(),
@@ -327,8 +288,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     {
         if ( $user_id === null )
             $user_id = eZUser::currentUserID();
-        $collection = new XROWRecurringOrderCollection( array( 'user_id' => $user_id, 'period' => XROWRECURRINGORDER_PERIOD_MONTHLY, 'send_day' => 1, 'status' => XROWRECURRINGORDER_STATUS_DEACTIVATED, 'created' => XROWRecurringOrderCollection::now() ) );
-        $collection->setAttribute( 'next_date', $collection->nextDate() );
+        $collection = new XROWRecurringOrderCollection( array( 'user_id' => $user_id, 'status' => XROWRECURRINGORDER_STATUS_DEACTIVATED, 'created' => XROWRecurringOrderCollection::now() ) );
         $collection->store();
         return $collection;
     }
@@ -336,7 +296,24 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     {
         return XROWRecurringOrderItem::add( $this->id, $object_id, $variations, $amount );
     }
-
+    function addHistory( $type = XROWRECURRINGORDER_STATUSTYPE_SUCCESS, $orderid = null, $text = null )
+    {
+        $row = array( 'date' => mktime(), 'type' => $type, 'data_text' => $text, 'order_id' => $orderid, 'collection_id' => $this->id );
+        $item = new XROWRecurringOrderHistory( $row );
+        $item->store();
+        if ( $type == XROWRECURRINGORDER_STATUSTYPE_SUCCESS )
+        {
+            $date = new eZDateTime( mktime() );
+            $date->setDay( $date->day() + 2 );
+            $this->setAttribute( 'next_try', $date->timeStamp() );
+            if ( $this->failuresSinceLastSuccess() >= 3 )
+            {
+                $this->setAttribute( 'status', XROWRECURRINGORDER_STATUS_DEACTIVATED );
+                // TODO send mail to user
+            }
+            $this->store();
+        }
+    }
     /*!
      \static
      fetch text array of available billing cycles
@@ -347,12 +324,12 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         if ( !isset( $GLOBALS['xrowBillingCycleTextArray'] ) )
         {
             $GLOBALS['xrowBillingCycleTextArray'] = array (
-                XROWRECURRINGORDER_PERIOD_ONETIME   => ezi18n( 'kernel/classes/recurringordercollection', "one time fee" ),
-                XROWRECURRINGORDER_PERIOD_DAY       => ezi18n( 'kernel/classes/recurringordercollection', "day(s)" ),
-                XROWRECURRINGORDER_PERIOD_WEEK      => ezi18n( 'kernel/classes/recurringordercollection', "weeks(s)" ),
-                XROWRECURRINGORDER_PERIOD_MONTH     => ezi18n( 'kernel/classes/recurringordercollection', "month(s)" ),
-                XROWRECURRINGORDER_PERIOD_QUARTER   => ezi18n( 'kernel/classes/recurringordercollection', "quarter(s)" ),
-                XROWRECURRINGORDER_PERIOD_YEAR      => ezi18n( 'kernel/classes/recurringordercollection', "year(s)" )
+                XROWRECURRINGORDER_CYCLE_ONETIME   => ezi18n( 'kernel/classes/recurringordercollection', "one time" ),
+                XROWRECURRINGORDER_CYCLE_DAY       => ezi18n( 'kernel/classes/recurringordercollection', "day(s)" ),
+                XROWRECURRINGORDER_CYCLE_WEEK      => ezi18n( 'kernel/classes/recurringordercollection', "weeks(s)" ),
+                XROWRECURRINGORDER_CYCLE_MONTH     => ezi18n( 'kernel/classes/recurringordercollection', "month(s)" ),
+                XROWRECURRINGORDER_CYCLE_QUARTER   => ezi18n( 'kernel/classes/recurringordercollection', "quarter(s)" ),
+                XROWRECURRINGORDER_CYCLE_YEAR      => ezi18n( 'kernel/classes/recurringordercollection', "year(s)" )
                 );
         }
         return $GLOBALS['xrowBillingCycleTextArray'];
@@ -368,12 +345,12 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         if ( !isset( $GLOBALS['xrowBillingCycleTextAdjectiveArray'] ) )
         {
             $GLOBALS['xrowBillingCycleTextAdjectiveArray'] = array (
-                    XROWRECURRINGORDER_PERIOD_ONETIME   => ezi18n( 'kernel/classes/recurringordercollection', "one time fee" ),
-                    XROWRECURRINGORDER_PERIOD_DAY       => ezi18n( 'kernel/classes/recurringordercollection', "daily" ),
-                    XROWRECURRINGORDER_PERIOD_WEEK      => ezi18n( 'kernel/classes/recurringordercollection', "weekly" ),
-                    XROWRECURRINGORDER_PERIOD_MONTH     => ezi18n( 'kernel/classes/recurringordercollection', "monthly" ),
-                    XROWRECURRINGORDER_PERIOD_QUARTER   => ezi18n( 'kernel/classes/recurringordercollection', "quarterly" ),
-                    XROWRECURRINGORDER_PERIOD_YEAR      => ezi18n( 'kernel/classes/recurringordercollection', "yearly" )
+                    XROWRECURRINGORDER_CYCLE_ONETIME   => ezi18n( 'kernel/classes/recurringordercollection', "one time" ),
+                    XROWRECURRINGORDER_CYCLE_DAY       => ezi18n( 'kernel/classes/recurringordercollection', "daily" ),
+                    XROWRECURRINGORDER_CYCLE_WEEK      => ezi18n( 'kernel/classes/recurringordercollection', "weekly" ),
+                    XROWRECURRINGORDER_CYCLE_MONTH     => ezi18n( 'kernel/classes/recurringordercollection', "monthly" ),
+                    XROWRECURRINGORDER_CYCLE_QUARTER   => ezi18n( 'kernel/classes/recurringordercollection', "quarterly" ),
+                    XROWRECURRINGORDER_CYCLE_YEAR      => ezi18n( 'kernel/classes/recurringordercollection', "yearly" )
                 );
         }
         return $GLOBALS['xrowBillingCycleTextAdjectiveArray'];
@@ -390,17 +367,17 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         if ( !isset( $GLOBALS['xrowBillingCycleText'] ) )
         {
             $GLOBALS['xrowBillingCycleText'] = array (
-                XROWRECURRINGORDER_PERIOD_ONETIME   => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "one time fee" ),
-                                                               1 => ezi18n( 'kernel/classes/recurringordercollection', "one time fee" ) ),
-                XROWRECURRINGORDER_PERIOD_DAY       => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "days" ),
+                XROWRECURRINGORDER_CYCLE_ONETIME   => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "one time" ),
+                                                               1 => ezi18n( 'kernel/classes/recurringordercollection', "one time" ) ),
+                XROWRECURRINGORDER_CYCLE_DAY       => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "days" ),
                                                                1 => ezi18n( 'kernel/classes/recurringordercollection', "day" ) ),
-                XROWRECURRINGORDER_PERIOD_WEEK      => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "weeks" ),
+                XROWRECURRINGORDER_CYCLE_WEEK      => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "weeks" ),
                                                                1 => ezi18n( 'kernel/classes/recurringordercollection', "week" ) ),
-                XROWRECURRINGORDER_PERIOD_MONTH     => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "months" ),
+                XROWRECURRINGORDER_CYCLE_MONTH     => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "months" ),
                                                                1 => ezi18n( 'kernel/classes/recurringordercollection', "month" ) ),
-                XROWRECURRINGORDER_PERIOD_QUARTER   => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "quarters" ),
+                XROWRECURRINGORDER_CYCLE_QUARTER   => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "quarters" ),
                                                                1 => ezi18n( 'kernel/classes/recurringordercollection', "quarter" ) ),
-                XROWRECURRINGORDER_PERIOD_YEAR      => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "years" ),
+                XROWRECURRINGORDER_CYCLE_YEAR      => array ( 0 => ezi18n( 'kernel/classes/recurringordercollection', "years" ),
                                                                1 => ezi18n( 'kernel/classes/recurringordercollection', "year" ) )
 
             );

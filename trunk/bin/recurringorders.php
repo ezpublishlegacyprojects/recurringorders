@@ -40,16 +40,17 @@ else
 }
 
 include_once( 'extension/recurringorders/classes/recurringordercollection.php');
-
+$cli->output( "Today is " . strftime( "%d.%m.%Y", XROWRecurringOrderCollection::now() ) );
 
 $list = XROWRecurringOrderCollection::fetchAll();
 foreach ( $list as $collection )
 {
     $cli->output( "Processing Collection #" . $collection->id );
+    $collection->markRun();
     $user = $collection->attribute( 'user' );
     if ( $collection->attribute( 'status' ) === XROWRECURRINGORDER_STATUS_DEACTIVATED )
     {
-        $cli->output( "Collection #" . $collection->id . ' deactivated');
+        $cli->output( "Collection #" . $collection->id . ' deactivated' );
         continue;
     }
     if ( !$collection->canTry() )
@@ -61,7 +62,7 @@ foreach ( $list as $collection )
     $cccheck = $collection->checkCreditCard();
     if ( $cccheck !== true )
     {
-        $collection->history( XROWRECURRINGORDER_STATUSTYPE_CREDITCARD_EXPIRES );
+        XROWRecurringOrderHistory::add( XROWRECURRINGORDER_STATUSTYPE_CREDITCARD_EXPIRES, $collection->id, 'Creditcard expires' );
         
         // creditcard error
         $cli->output( "Collection #" . $collection->id . ' creditcard error' );
@@ -69,7 +70,7 @@ foreach ( $list as $collection )
     }
     if ( !$collection->isDue() )    
     {
-        $cli->output( "Collection #" . $collection->id . " is due " . strftime( "%d.%m.%Y", $collection->attribute( 'next_date' ) ) . ' with last successfull order date ' . strftime( "%d.%m.%Y", $collection->last_success ) );
+        $cli->output( "Collection #" . $collection->id . " has no items that are due." );
         continue;
     }
     include_once( 'kernel/classes/ezshopaccounthandler.php' );
@@ -80,8 +81,9 @@ foreach ( $list as $collection )
     {
         continue;
     }
-    $order = $collection->createOrder();
-    
+    $items = $collection->fetchDueList();
+    $order = $collection->createOrder( $items );
+
     $userArray = $accountHandler->fillAccountArray( $user );
 
     $node = XROWRecurringOrderCollection::createDOMTreefromArray( "shop_account", $userArray );
@@ -100,27 +102,34 @@ foreach ( $list as $collection )
     switch( $operationResult['status'] )
     {
         case EZ_MODULE_OPERATION_HALTED:
+        {
+            if (  isset( $operationResult['redirect_url'] ) )
             {
-                if (  isset( $operationResult['redirect_url'] ) )
-                {
-                    continue;
-                }
-                else if ( isset( $operationResult['result'] ) )
-                {
-                    continue;
-                }
-            }break;
-        case EZ_MODULE_OPERATION_CANCELED:
-            {
+                XROWRecurringOrderHistory::add( XROWRECURRINGORDER_STATUSTYPE_FAILURE, $collection->id, $order->id, "Order has been processed with a strange result.", $order->id);
                 continue;
             }
-
+            else if ( isset( $operationResult['result'] ) )
+            {
+                XROWRecurringOrderHistory::add( XROWRECURRINGORDER_STATUSTYPE_FAILURE, $collection->id, $order->id, "Order has been processed with a strange result.", $order->id);
+                continue;
+            }
+        }break;
+        case EZ_MODULE_OPERATION_CANCELED:
+        {
+            XROWRecurringOrderHistory::add( XROWRECURRINGORDER_STATUSTYPE_FAILURE, $collection->id, "Order has been CANCELED.", $order->id);
+            continue;
+        }
     }
-    $order = eZOrder::fetch( $order->id );
-    $collection->setAttribute( 'last_success', time() );
-    $collection->setAttribute( 'next_date', $collection->nextDate() );
-    $collection->store();
-    $cli->output( "Order #" . $order->OrderNr . " created next order is on " . strftime( "%d.%m.%Y", $collection->attribute( 'next_date' ) ) );
+
+    $order = eZOrder::fetch( $order->ID );
+    $cli->output( "Order #" . $order->OrderNr . " created." );
+    foreach ( $items as $item )
+    {
+        $item->setAttribute( 'last_success', $item->attribute( 'next_date' ) );
+        $item->store();
+        $cli->output( "  Item #" . $item->item_id . " next order is on " . strftime( "%d.%m.%Y", $item->attribute( 'next_date' ) ) );
+    }
+    XROWRecurringOrderHistory::add( XROWRECURRINGORDER_STATUSTYPE_SUCCESS, $collection->id, "Order has been completed.", $order->id );
 }
 $cli->output( "Recurring Orders processed" );
 

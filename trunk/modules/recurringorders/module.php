@@ -2,9 +2,12 @@
 $Module = array( "name" => "Recurring orders" );
 
 $ViewList = array();
-$ViewList["add"] = array( "script" => "add.php" );
+$ViewList["add"] = array( 
+    "functions" => array( 'buy' ),
+    "script" => "add.php"
+);
 $ViewList["list"] = array( 
-            'functions' => array( 'use' ), 
+            "functions" => array( 'buy' ),
             'single_post_actions' => array( 'Remove' => 'Remove',
                                             'Cancel' => 'Cancel',
                                             'Update' => 'Update' ),
@@ -19,10 +22,15 @@ $ViewList["list"] = array(
                                         ),
             'params' => array( 'CollectionID' ),
             'script' => 'list.php' );
-$ViewList['failures'] = array(
+$ViewList['history'] = array(
+    "default_navigation_part" => 'ezshopnavigationpart',
     'functions' => array( 'administrate' ),
-    'script' => 'failures.php' );
-
+    'params' => array( 'Offset' ),
+    'script' => 'history.php' );
+$ViewList['forecast'] = array(
+    "default_navigation_part" => 'ezshopnavigationpart',
+    'functions' => array( 'administrate' ),
+    'script' => 'forecast.php' );
 $FunctionList['administrate'] = array( );
 $FunctionList['use'] = array( );
 ?>
