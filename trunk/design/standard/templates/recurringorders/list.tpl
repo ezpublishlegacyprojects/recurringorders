@@ -113,6 +113,8 @@ All prices exclude Tax, Shipping and Handling. Those will be added to your order
 <input class="button" type="submit" name="Update" value="Update" />
 <input class="button" type="submit" name="Cancel" value="Cancel" />
 </form>
+<!--
 Last : {$collection.last_run|l10n( 'shortdate' )}<br/>
 Now : {$collection.now|l10n( 'shortdate' )}<br/>
+-->
 </div>

@@ -48,7 +48,7 @@ foreach ( $list as $collection )
     $cli->output( "Processing Collection #" . $collection->id );
     $collection->markRun();
     $user = $collection->attribute( 'user' );
-    if ( $collection->attribute( 'status' ) === XROWRECURRINGORDER_STATUS_DEACTIVATED )
+    if ( $collection->attribute( 'status' ) == XROWRECURRINGORDER_STATUS_DEACTIVATED )
     {
         $cli->output( "Collection #" . $collection->id . ' deactivated' );
         continue;
@@ -82,6 +82,9 @@ foreach ( $list as $collection )
         continue;
     }
     $items = $collection->fetchDueList();
+    
+    //TODO check if all items are valid
+    
     $order = $collection->createOrder( $items );
 
     $userArray = $accountHandler->fillAccountArray( $user );
@@ -129,7 +132,7 @@ foreach ( $list as $collection )
         $item->store();
         $cli->output( "  Item #" . $item->item_id . " next order is on " . strftime( "%d.%m.%Y", $item->attribute( 'next_date' ) ) );
     }
-    XROWRecurringOrderHistory::add( XROWRECURRINGORDER_STATUSTYPE_SUCCESS, $collection->id, "Order has been completed.", $order->id );
+    XROWRecurringOrderHistory::add( XROWRECURRINGORDER_STATUSTYPE_SUCCESS, $collection->id, "Order has been completed.", $order->ID );
 }
 $cli->output( "Recurring Orders processed" );
 

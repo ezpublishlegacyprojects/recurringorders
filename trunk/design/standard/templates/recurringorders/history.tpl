@@ -27,7 +27,7 @@
         <td class="name" align="right">{$item.data_text}</td>
         <td class="name" align="right">{$item.type_text}</td>
         <td class="name" align="right">{$item.date|l10n( 'shortdate' )}</td>
-        <td class="number" align="right">{$item.order_id}
+        <td class="number" align="right">
              <a href={concat( '/shop/orderview/', $item.order_id )|ezurl}>{$item.order_id}</a>
         </td>
     	<td class="number" align="right">

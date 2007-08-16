@@ -158,7 +158,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     function now()
     {
         #return 1189002190;<br />
-        return gmmktime( 0,0,0,9,30,2007 );
+        return gmmktime( 0,0,0,3,30,2008 );
         #return gmmktime( 0,0,0 );
     }
 

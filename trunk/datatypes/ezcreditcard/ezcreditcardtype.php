@@ -156,7 +156,14 @@ class ezcreditcardType extends eZDataType
                 }
             }
         }
-
+        /* TODO 
+        if there are recurring orders we need a credit card.
+        $collections = XROWRecurringOrderCollection::fetchByUser();
+        if ( $collections )
+        {}
+        $contentObjectAttribute->setValidationError( ezi18n( 'kernel/classes/datatypes',
+                                                                                 'Input required.' ) );
+        */
         return EZ_INPUT_VALIDATOR_STATE_ACCEPTED;
     }
 
