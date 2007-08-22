@@ -64,7 +64,7 @@ class xrowBillingCycleType extends eZDataType
         }
         else
         {
-            $contentObjectAttribute->setAttribute( "data_int", XROWRECURRINGORDER_PERIOD_ONETIME );
+            $contentObjectAttribute->setAttribute( "data_int", XROWRECURRINGORDER_CYCLE_ONETIME );
             $contentObjectAttribute->setAttribute( "data_text", 0 );
         }
     }
@@ -160,7 +160,7 @@ class xrowBillingCycleType extends eZDataType
     /*!
      Clears cache
     */
-    function storeObjectAttribute( &$object_attribute )
+    function storeObjectAttribute( &$contentObjectAttribute )
     {
         if ( isset( $GLOBALS['xrowBillingCycleCache'][$contentObjectAttribute->ContentObjectID][$contentObjectAttribute->Version] ) )
             unset( $GLOBALS['xrowBillingCycleCache'][$contentObjectAttribute->ContentObjectID][$contentObjectAttribute->Version] );
