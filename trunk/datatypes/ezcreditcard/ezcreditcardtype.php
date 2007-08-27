@@ -156,7 +156,7 @@ class ezcreditcardType extends eZDataType
                 }
             }
         }
-        /* TODO 
+        /* TODO
         if there are recurring orders we need a credit card.
         $collections = XROWRecurringOrderCollection::fetchByUser();
         if ( $collections )
@@ -258,8 +258,11 @@ class ezcreditcardType extends eZDataType
     function storeObjectAttribute( &$attribute )
     {
         $data = ezcreditcardType::createArrayfromXML( $attribute->attribute( 'data_text' ) );
-        if ( $data['number'] or $data['accountnumber'] )
+        if ( isset( $data['number'] ) and $data['number'] )
             $data['has_stored_card'] = 1;
+        else if ( isset( $data['accountnumber'] ) and $data['accountnumber'] )
+            $data['has_stored_card'] = 1;
+
         $doc = new eZDOMDocument( 'creditcard' );
         $root = ezcreditcardType::createDOMTreefromArray( 'creditcard', $data );
         $doc->setRoot( $root );
