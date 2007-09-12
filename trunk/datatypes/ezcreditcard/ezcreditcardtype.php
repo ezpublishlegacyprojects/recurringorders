@@ -335,6 +335,9 @@ class ezcreditcardType extends eZDataType
             if ( isset( $content['bankcode'] ) )
                 $content['bankcode'] = ezcreditcardType::gpgDecode( $content['bankcode'] );
 
+            if ( isset( $content['type'] ) )
+                $content['type_name'] = ezcreditcardType::getCardTypeName( $content['type'] );
+
             $GLOBALS['eZCreditcardCache'][$contentObjectAttribute->ID][$contentObjectAttribute->Version] = $content;
 
             return $content;

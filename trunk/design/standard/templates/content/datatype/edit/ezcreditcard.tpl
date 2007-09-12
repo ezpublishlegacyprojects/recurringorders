@@ -27,7 +27,7 @@
 
     <p>
         <label>{"Current stored card"|i18n('design/standard/content/datatype')}</label>
-       {$types[$attribute.content.type]|wash}
+       {$attribute.content.type_name|wash}
     </p>
     {if $attribute.content.type|eq(5)}
         <p>
