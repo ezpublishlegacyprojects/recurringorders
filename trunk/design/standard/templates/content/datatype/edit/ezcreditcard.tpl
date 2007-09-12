@@ -23,7 +23,7 @@
 {default attribute_base='ContentObjectAttribute'
          html_class='full'}
 <div class="block">
-{if $attribute.content.has_stored_card}
+{if and(is_set($attribute.content.has_stored_card),$attribute.content.has_stored_card)}
 
     <p>
         <label>{"Current stored card"|i18n('design/standard/content/datatype')}</label>
@@ -55,20 +55,30 @@
 
     {/if}
 {else}
+    {def $type=first_set( $attribute.content.type, '' )
+         $name=first_set( $attribute.content.name, '' )
+         $number=first_set( $attribute.content.number, '' )
+         $cmonth=first_set( $attribute.content.month, '' )
+         $cyear=first_set( $attribute.content.year, '' )
+         $ecname=first_set( $attribute.content.ecname, '' )
+         $accountnumber=first_set( $attribute.content.accountnumber, '' )
+         $bankcode=first_set( $attribute.content.bankcode, '' )
+         $securitycode=first_set( $attribute.content.securitycode, '' )
+    }
 
     <label>{'Card type'|i18n( 'design/standard/content/datatype' )}</label>
     <select name="{$attribute_base}_ezcreditcard_type_{$attribute.id}" id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" onchange="updateCCField{$attribute.id}(this.value, {$attribute.id} );" >
     {foreach $gateway_array as $key => $gateway}
-        <option value="{$key}"{if $attribute.content.type|eq($key)} selected="selected"{/if}>{$card_array[$key]|wash}</option>
+        <option value="{$key}"{if $type|eq($key)} selected="selected"{/if}>{$card_array[$key]|wash}</option>
     {/foreach}
     </select>
-    <div id="ro-creditcardtype-{$attribute.id}"{if $attribute.content.type|eq(5)} style="display: none;"{/if}>
+    <div id="ro-creditcardtype-{$attribute.id}"{if $type|eq(5)} style="display: none;"{/if}>
         <label>{'Name on card'|i18n( 'design/standard/content/datatype' )}:</label>
-        <input id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" type="text" size="70" name="{$attribute_base}_ezcreditcard_name_{$attribute.id}" value="{$attribute.content.name|wash( xhtml )}" />
+        <input id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" type="text" size="70" name="{$attribute_base}_ezcreditcard_name_{$attribute.id}" value="{$name|wash( xhtml )}" />
         <label>{'Creditcard number'|i18n( 'design/standard/content/datatype' )}</label>
-        <input id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" type="text" size="70" name="{$attribute_base}_ezcreditcard_number_{$attribute.id}" value="{$attribute.content.number|wash( xhtml )}" />
+        <input id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" type="text" size="70" name="{$attribute_base}_ezcreditcard_number_{$attribute.id}" value="{$number|wash( xhtml )}" />
         <label>{'Security Code'|i18n( 'design/standard/content/datatype' )}</label>
-        <input maxlength="4" id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" type="text" size="70" name="{$attribute_base}_ezcreditcard_securitycode_{$attribute.id}" value="{$attribute.content.securitycode|wash( xhtml )}" />
+        <input maxlength="4" id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" type="text" size="70" name="{$attribute_base}_ezcreditcard_securitycode_{$attribute.id}" value="{$securitycode|wash( xhtml )}" />
 
         <div class="block">
             <div class="element">
@@ -76,7 +86,7 @@
             <select name="{$attribute_base}_ezcreditcard_month_{$attribute.id}" id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" >
             {def $months = array('01','02','03','04','05','06','07','08','09','10','11','12')}
             {foreach $months as $month}
-            <option value="{$month}"{if $month|eq($attribute.content.month)} selected="selected"{/if}>{$month}</option>
+            <option value="{$month}"{if $month|eq($cmonth)} selected="selected"{/if}>{$month}</option>
             {/foreach}
             </select>
             </div>
@@ -86,20 +96,20 @@
             <select name="{$attribute_base}_ezcreditcard_year_{$attribute.id}" id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" >
             {def $year=currentdate()|datetime(custom,'%Y')}
             {for $year to sum($year,10) as $i}
-            <option value="{$i}"{if $i|eq($attribute.content.year)}selected="selected"{/if}>{$i}</option>
+            <option value="{$i}"{if $i|eq($cyear)}selected="selected"{/if}>{$i}</option>
             {/for}
             </select>
             </div>
             <div class="break"></div>
         </div>
     </div>
-    <div id="ro-ectype-{$attribute.id}"{if or( is_null($attribute.content.type), $attribute.content.type|ne(5))} style="display: none;"{/if}>
+    <div id="ro-ectype-{$attribute.id}"{if $type|ne(5)} style="display: none;"{/if}>
          <label>{'Name of account'|i18n( 'design/standard/content/datatype' )}:</label>
-        <input maxlength="27" id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" type="text" size="70" name="{$attribute_base}_ezcreditcard_ecname_{$attribute.id}" value="{$attribute.content.ecname|wash( xhtml )}" />
+        <input maxlength="27" id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" type="text" size="70" name="{$attribute_base}_ezcreditcard_ecname_{$attribute.id}" value="{$ecname|wash( xhtml )}" />
         <label>{'Account number'|i18n( 'design/standard/content/datatype' )}</label>
-        <input maxlength="10" id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" type="text" size="70" name="{$attribute_base}_ezcreditcard_accountnumber_{$attribute.id}" value="{$attribute.content.accountnumber|wash( xhtml )}" />
+        <input maxlength="10" id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" type="text" size="70" name="{$attribute_base}_ezcreditcard_accountnumber_{$attribute.id}" value="{$accountnumber|wash( xhtml )}" />
         <label>{'Bank code'|i18n( 'design/standard/content/datatype' )}</label>
-        <input maxlength="8" id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" type="text" size="70" name="{$attribute_base}_ezcreditcard_bankcode_{$attribute.id}" value="{$attribute.content.bankcode|wash( xhtml )}" />
+        <input maxlength="8" id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" type="text" size="70" name="{$attribute_base}_ezcreditcard_bankcode_{$attribute.id}" value="{$bankcode|wash( xhtml )}" />
 
     </div>
 {/if}
