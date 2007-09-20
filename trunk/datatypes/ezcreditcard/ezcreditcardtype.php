@@ -156,9 +156,11 @@ class ezcreditcardType extends eZDataType
                 }
             }
         }
-        /* TODO
-        if there are recurring orders we need a credit card.
+        /* TODO 
+            if there are recurring orders we need a credit card.
+        */
         $collections = XROWRecurringOrderCollection::fetchByUser();
+        
         foreach ( $collections as $collection )
         {
            $list = $collection->fetchList();
