@@ -12,9 +12,9 @@ define( 'XROWRECURRINGORDER_STATUS_ACTIVE', 1 );
 define( 'XROWRECURRINGORDER_STATUSTYPE_SUCCESS', 1 );
 define( 'XROWRECURRINGORDER_STATUSTYPE_CREDITCARD_EXPIRES', 2 );
 define( 'XROWRECURRINGORDER_STATUSTYPE_FAILURE', 2 );
-include_once( "kernel/classes/ezpersistentobject.php" );
 
-include_once('lib/ezlocale/classes/ezdatetime.php');
+include_once( 'kernel/classes/ezpersistentobject.php' );
+include_once( 'lib/ezlocale/classes/ezdatetime.php');
 include_once( 'extension/recurringorders/classes/recurringorderhistory.php');
 include_once( 'extension/recurringorders/classes/recurringorderitem.php');
 include_once( 'extension/recurringorders/classes/recurringorderitemoption.php');
@@ -312,9 +312,9 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         $collection->store();
         return $collection;
     }
-    function add( $object_id, $variations = null, $amount = 0 )
+    function add( $object_id, $variations = null, $amount = 0, $cycle = 1, $cycle_unit = null )
     {
-        return XROWRecurringOrderItem::add( $this->id, $object_id, $variations, $amount );
+        return XROWRecurringOrderItem::add( $this->id, $object_id, $variations, $amount, $cycle, $cycle_unit );
     }
     function addHistory( $type = XROWRECURRINGORDER_STATUSTYPE_SUCCESS, $orderid = null, $text = null )
     {
