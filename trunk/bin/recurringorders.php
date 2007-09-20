@@ -63,7 +63,7 @@ foreach ( $list as $collection )
     if ( $cccheck !== true )
     {
         XROWRecurringOrderHistory::add( XROWRECURRINGORDER_STATUSTYPE_CREDITCARD_EXPIRES, $collection->id, 'Creditcard expires' );
-        
+        $collection->sendMail( 'design:recurringorders/email/check_payment.tpl' );
         // creditcard error
         $cli->output( "Collection #" . $collection->id . ' creditcard error' );
         continue;

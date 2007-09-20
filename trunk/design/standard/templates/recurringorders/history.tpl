@@ -34,7 +34,7 @@
     	    <a href={concat( '/recurringorders/list/', $item.collection_id )|ezurl}>{$item.collection_id}</a>
     	</td>
     	<td class="number" align="right">
-            <a href={concat( '/shop/customerorderview/', $item.collection.user_id )|ezurl}>{$item.collection.user_id}</a>
+    	{if is_set($item.collection.user_id)}<a href={concat( '/shop/customerorderview/', $item.collection.user_id )|ezurl}>{$item.collection.user_id}</a>{/if}
     	</td>
     </tr>
 

@@ -6,7 +6,7 @@ include_once( 'lib/ezutils/classes/ezintegervalidator.php' );
 include_once( 'kernel/common/i18n.php' );
 include_once( 'lib/ezxml/classes/ezxml.php' );
 include_once( eZExtension::baseDirectory() . '/recurringorders/classes/xrowpaymentinfo.php' );
-
+include_once( eZExtension::baseDirectory() . '/recurringorders/classes/recurringordercollection.php' );
 define( 'EZ_DATATYPESTRING_CREDITCARD', 'ezcreditcard' );
 define( 'EZ_DATATYPE_CREDITCARD_GATEWAY_FIELD', 'data_text5' );
 
@@ -159,11 +159,17 @@ class ezcreditcardType extends eZDataType
         /* TODO
         if there are recurring orders we need a credit card.
         $collections = XROWRecurringOrderCollection::fetchByUser();
-        if ( $collections )
-        {}
-        $contentObjectAttribute->setValidationError( ezi18n( 'kernel/classes/datatypes',
-                                                                                 'Input required.' ) );
-        */
+        foreach ( $collections as $collection )
+        {
+           $list = $collection->fetchList();
+           if( count( $list ) > 0 )
+           {
+                $contentObjectAttribute->setValidationError( ezi18n( 'kernel/classes/datatypes',
+                                                                                 'Input is required, if you have active subcriptions or recurring orders.' ) );
+                return EZ_INPUT_VALIDATOR_STATE_INVALID;
+           }
+        }
+
         return EZ_INPUT_VALIDATOR_STATE_ACCEPTED;
     }
 

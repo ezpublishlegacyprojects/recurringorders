@@ -7,6 +7,7 @@ $ViewList["add"] = array(
     "script" => "add.php"
 );
 $ViewList["list"] = array( 
+            "default_navigation_part" => 'ezshopnavigationpart',
             "functions" => array( 'buy' ),
             'single_post_actions' => array( 'Remove' => 'Remove',
                                             'Cancel' => 'Cancel',

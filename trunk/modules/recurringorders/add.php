@@ -35,8 +35,12 @@ if ( $http->hasPostVariable( "ActionAddToRecurring" ) )
              return;
         }
         $collection  = XROWRecurringOrderCollection::fetchByUser();
-        if ( !is_object( $collection ) )
+        if ( !is_array( $collection ) or count( $collection ) == 0 )
             $collection = XROWRecurringOrderCollection::createNew();
+        elseif ( is_array( $collection ) )
+        {
+            $collection = $collection[0];
+        }
         foreach ( $result as $item )
         {
             $collection->add( $item['object_id'], $item['variations'], $item['quantity']);

@@ -41,10 +41,6 @@ class XROWRecurringOrderItem extends eZPersistentObject
                                                              'datatype' => 'integer',
                                                              'default' => 0,
                                                              'required' => true ),
-                                         "order_date" => array( 'name' => "order_date",
-                                                                   'datatype' => 'integer',
-                                                                   'default' => null,
-                                                                   'required' => true ),
                                          "next_date" => array( 'name' => "next_date",
                                                              'datatype' => 'integer',
                                                              'default' => 0,
@@ -65,27 +61,11 @@ class XROWRecurringOrderItem extends eZPersistentObject
                                                         'days_in_cycle' => 'daysInCycle',
                                                         "price_per_item" => "pricePerItem",
                                                         "price" => "price",
-                                                        "real_next_order_date" => "realNextOrderDate",
-                                                        'order_date_object' => 'orderDateObject',
                                                         "options" => "options"
                                                      ),
                       "class_name" => "XROWRecurringOrderItem",
                       "sort" => array( "created" => "asc" ),
                       "name" => "xrow_recurring_order_item" );
-    }
-    function store()
-    {
-    	$this->setAttribute( 'next_date', $this->nextDate() );
-    	parent::store();
-    }
-    function &orderDateObject()
-    {
-    	$return = new eZDateTime( $this->order_date );
-    	return $return;
-    }
-    function realNextOrderDate()
-    {
-    	return $this->next_date + $this->order_date;
     }
     function collection()
     {
@@ -105,15 +85,20 @@ class XROWRecurringOrderItem extends eZPersistentObject
         }
         return $return;
     }
-    function &setAttribute( $name, $value )
+
+    function &setAttribute( $name, $value, $updatenextdate = false )
     {
         switch ( $name )
         {
             case 'cycle_unit':
             case 'cycle':
             case 'order_date':
+                $return = parent::setAttribute( $name, $value );
+                if ( $updatenextdate == true )
+                    $this->setAttribute( 'next_date', $this->nextDate() );
+            break;
             case 'last_success':
-                parent::setAttribute( $name, $value );
+                $return = parent::setAttribute( $name, $value );
                 $this->setAttribute( 'next_date', $this->nextDate() );
             break;
             default:
@@ -128,7 +113,7 @@ class XROWRecurringOrderItem extends eZPersistentObject
             $nextdate = $this->attribute( 'last_success' );
         else
             $nextdate = $this->attribute( 'created' );
-    	while( $toTime > $nextdate )
+    	while( $toTime >= $nextdate )
     	{
     	    $nextdate = $this->nextDateHelper( $nextdate );
     	}
@@ -136,26 +121,6 @@ class XROWRecurringOrderItem extends eZPersistentObject
     }
     function nextDate()
     {
-        /*
-        if ( $this->attribute( 'last_run') > $this->attribute( 'next_date') )
-        {
-            $result = $this->forwardNextDate( $this->attribute( 'last_run') );
-        }
-        
-        if ( $this->last_success )
-        {
-            $time = $this->last_success;
-            $result = $this->nextDateHelper( $time );
-        }
-        else
-        {
-            $time = $this->created;
-            $result = $this->nextDateHelper( $time );
-        }
-
-        if ( $this->attribute( 'next_date') < XROWRecurringOrderCollection::now() )
-            $result = $this->forwardNextDate( XROWRecurringOrderCollection::now() );
-        */
         return $this->forwardNextDate( XROWRecurringOrderCollection::now() );
     }
     function daysInCycle()
@@ -188,10 +153,6 @@ class XROWRecurringOrderItem extends eZPersistentObject
     }
     function nextDateHelper( $time )
     {
-        if ( $this->is_subscription && $this->order_date === null )
-        {
-            return XROWRecurringOrderCollection::now();
-        }
         $datetime = new eZDateTime( $time );
         if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_MONTH )
         {
@@ -238,7 +199,7 @@ class XROWRecurringOrderItem extends eZPersistentObject
     }
     function isDue()
     {
-        if ( $this->realNextOrderDate() < XROWRecurringOrderCollection::now() )
+        if ( $this->next_date < XROWRecurringOrderCollection::now() )
             return true;
         else
             return false;
@@ -310,13 +271,18 @@ class XROWRecurringOrderItem extends eZPersistentObject
         }
         parent::remove();
     }
-    function add( $collection_id, $object_id, $variations = null, $amount, $cycle = 1, $cycle_unit = XROWRECURRINGORDER_CYCLE_MONTH )
+    function add( $collection_id, $object_id, $variations = null, $amount, $cycle = 1, $cycle_unit = null )
     {
-        
+        if ( $cycle_unit === null )
+        {
+            $ini = eZINI::instance( 'recurringorders.ini' );
+            $cycle_unit = (int)$ini->variable( 'RecurringOrderSettings', 'DefaultCycle' );
+        }
         if ( !$amount ) // else we need a subscription handler
             return false;
 
-        $item = new XROWRecurringOrderItem( array( 'cycle' => $cycle, 'order_date' => 0, 'cycle_unit' => $cycle_unit, 'created' => XROWRecurringOrderCollection::now(), 'collection_id' => $collection_id, 'user_id' => eZUser::currentUserID(), 'contentobject_id' => $object_id, 'amount' => $amount ) );
+        $item = new XROWRecurringOrderItem( array( 'cycle' => $cycle, 'cycle_unit' => $cycle_unit, 'created' => XROWRecurringOrderCollection::now(), 'collection_id' => $collection_id, 'user_id' => eZUser::currentUserID(), 'contentobject_id' => $object_id, 'amount' => $amount ) );
+        $item->setAttribute( 'next_date', $item->nextDate() );
         $item->store();
         foreach ( $variations as $variation_id => $option_id )
         {

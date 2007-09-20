@@ -93,11 +93,31 @@ class XROWRecurringOrderCollection extends eZPersistentObject
                 return XROWRECURRINGORDER_STATUSTYPE_CREDITCARD_EXPIRES;
             }
             else
+            {
                 return true;
+            }
         }
         else
         {
             return XROWRECURRINGORDER_ERROR_CREDITCARD_MISSING;
+        }
+    }
+    function creditCardExpiryDate()
+    {
+    	$user = $this->attribute( 'user' );
+        if ( !is_object( $user ) )
+            return false;
+        $userco = $user->attribute( 'contentobject' );
+        $dm = $userco->attribute( 'data_map' );
+        $data = $dm['creditcard']->attribute( 'content' );
+        if ( $data['month'] and $data['year'] )
+        {
+            $date = eZDateTime::create( -1, -1, -1, $data['month'], -1, $data['year'] );
+            return $date;
+        }
+        else
+        {
+            return null;
         }
     }
     function hadErrorSince( $days )
@@ -158,7 +178,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     function now()
     {
         #return 1189002190;<br />
-        return gmmktime( 0,0,0,3,30,2008 );
+        return gmmktime( 0,0,0,9,2,2007 );
         #return gmmktime( 0,0,0 );
     }
 
@@ -245,7 +265,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     {
         if ( $user_id === null )
                $user_id = eZUser::currentUserID();
-        return eZPersistentObject::fetchObject( XROWRecurringOrderCollection::definition(),
+        return eZPersistentObject::fetchObjectList( XROWRecurringOrderCollection::definition(),
                 null, array( 'user_id' => $user_id ), true );
 
     }
@@ -288,7 +308,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     {
         if ( $user_id === null )
             $user_id = eZUser::currentUserID();
-        $collection = new XROWRecurringOrderCollection( array( 'user_id' => $user_id, 'status' => XROWRECURRINGORDER_STATUS_DEACTIVATED, 'created' => XROWRecurringOrderCollection::now() ) );
+        $collection = new XROWRecurringOrderCollection( array( 'user_id' => $user_id, 'status' => XROWRECURRINGORDER_STATUS_ACTIVE, 'created' => XROWRecurringOrderCollection::now() ) );
         $collection->store();
         return $collection;
     }
@@ -309,9 +329,52 @@ class XROWRecurringOrderCollection extends eZPersistentObject
             if ( $this->failuresSinceLastSuccess() >= 3 )
             {
                 $this->setAttribute( 'status', XROWRECURRINGORDER_STATUS_DEACTIVATED );
-                // TODO send mail to user
+                $collection->sendMail( 'design:recurringorders/email/manyfailures.tpl' );
             }
             $this->store();
+        }
+    }
+    function hasSubscription( $object_id )
+    {
+        $return = XROWRecurringOrderItem::fetchObject( XROWRecurringOrderItem::definition(), null, array( 'contentobject_id' => $object_id, 'is_subscription' => '1' ) );
+        if( isset( $return[0] ) )
+            return true;
+        else
+            return false;
+    }
+    function sendMail( $template, $params )
+    {
+        $user = $this->attribute( 'user' );
+        $userobject = $user->attribute( 'contentobject' );
+        $ini = eZINI::instance();
+        include_once( "lib/ezutils/classes/ezmail.php" );
+        include_once( "lib/ezutils/classes/ezmailtransport.php" );
+    	$mail = new eZMail();
+
+        $mail->setSender( $ini->variable( 'MailSettings', 'AdminEmail' ) );
+        $mail->setReceiver( $user->attribute( 'email' ), $userobject->attribute( 'name' ) );
+        
+
+        // fetch text from mail template
+        $mailtpl =& templateInit();
+        foreach ( $params as $key => $value )
+        {
+            $mailtpl->setVariable( $key, $value );
+        }
+        $mailtext =& $mailtpl->fetch( $template );
+        $subject = $tpl->variable( 'subject' );
+        $mail->setSubject( $subject );
+        $mail->setBody( $mailtext );
+
+        // mail was sent ok
+        if ( eZMailTransport::send( $mail ) )
+        {
+            return true;
+        }
+        else
+        {
+            eZDebug::writeError( "Failed to send mail.", 'Recurring orders' );
+            return false;
         }
     }
     /*!
@@ -331,6 +394,11 @@ class XROWRecurringOrderCollection extends eZPersistentObject
                 XROWRECURRINGORDER_CYCLE_QUARTER   => ezi18n( 'kernel/classes/recurringordercollection', "quarter(s)" ),
                 XROWRECURRINGORDER_CYCLE_YEAR      => ezi18n( 'kernel/classes/recurringordercollection', "year(s)" )
                 );
+            $ini = eZINI::instance( 'recurringorders.ini' );
+            foreach ( $ini->variable( 'RecurringOrderSettings','DisabledCycles' ) as $disabled )
+            {
+                unset( $GLOBALS['xrowBillingCycleTextArray'][$disabled] );
+            }
         }
         return $GLOBALS['xrowBillingCycleTextArray'];
     }
@@ -342,6 +410,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     */
     function getBillingCycleTextAdjectiveArray()
     {
+        
         if ( !isset( $GLOBALS['xrowBillingCycleTextAdjectiveArray'] ) )
         {
             $GLOBALS['xrowBillingCycleTextAdjectiveArray'] = array (
@@ -352,6 +421,11 @@ class XROWRecurringOrderCollection extends eZPersistentObject
                     XROWRECURRINGORDER_CYCLE_QUARTER   => ezi18n( 'kernel/classes/recurringordercollection', "quarterly" ),
                     XROWRECURRINGORDER_CYCLE_YEAR      => ezi18n( 'kernel/classes/recurringordercollection', "yearly" )
                 );
+            $ini = eZINI::instance( 'recurringorders.ini' );
+            foreach ( $ini->variable( 'RecurringOrderSettings','DisabledCycles' ) as $disabled )
+            {
+                unset( $GLOBALS['xrowBillingCycleTextAdjectiveArray'][$disabled] );
+            }
         }
         return $GLOBALS['xrowBillingCycleTextAdjectiveArray'];
     }
@@ -381,6 +455,11 @@ class XROWRecurringOrderCollection extends eZPersistentObject
                                                                1 => ezi18n( 'kernel/classes/recurringordercollection', "year" ) )
 
             );
+            $ini = eZINI::instance( 'recurringorders.ini' );
+            foreach ( $ini->variable( 'RecurringOrderSettings','DisabledCycles' ) as $disabled )
+            {
+                unset( $GLOBALS['xrowBillingCycleText'][$disabled] );
+            }
         }
 
         if ( $quantity == 1 )

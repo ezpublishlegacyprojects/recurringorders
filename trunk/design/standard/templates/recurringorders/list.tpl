@@ -1,3 +1,83 @@
+<link rel="stylesheet" type="text/css" href="/extension/recurringorders/design/standard/javascript/yui/fonts/fonts-min.css" />
+<link rel="stylesheet" type="text/css" href="/extension/recurringorders/design/standard/javascript/yui/calendar/assets/skins/sam/calendar.css" />
+<div class=" yui-skin-sam">
+
+{literal}
+<script type="text/javascript">
+YAHOO.namespace("example.calendar");
+function ShowHide(id)
+{
+    	    var ComponentName = id + '-container';
+	        if ( YAHOO.util.Dom.hasClass( ComponentName, 'hide') )
+	        {
+	            YAHOO.util.Dom.removeClass(ComponentName, 'hide');
+	            YAHOO.util.Dom.addClass(ComponentName, 'show');
+	        }
+	        else
+	        {
+	            YAHOO.util.Dom.removeClass(ComponentName, 'show');
+	            YAHOO.util.Dom.addClass(ComponentName, 'hide');
+	        }
+}
+function handleSelect(type,args,obj) {
+			var dates = args[0]; 
+			var date = dates[0];
+			var year = date[0], month = date[1], day = date[2];
+
+			var txtDate1 = document.getElementById( obj.id + "-date");
+			txtDate1.value = month + "/" + day + "/" + year;
+			ShowHide( obj.id );
+}
+</script>
+{/literal}
+{literal}
+<style type="text/css">
+	.container
+	{
+        margin-right:10px; 
+        margin-bottom:10px; 	
+        position:absolute;
+	}
+	.hide
+	{
+        display: none;
+	}
+	.show
+	{
+	   display: block;
+	}
+</style>
+{/literal}
+
+
+{*
+{literal}
+<script type="text/javascript">
+	YAHOO.util.Event.onDOMReady( function() {
+		YAHOO.example.calendar.cal1222 = new YAHOO.widget.Calendar("cal1","cal1222-container", 
+																	{ mindate:"1/1/2006",
+																	  maxdate:"12/31/2008" });
+		YAHOO.example.calendar.cal1222.selectEvent.subscribe(handleSelect, YAHOO.example.calendar.cal1222, true);
+		YAHOO.example.calendar.cal1222.render();
+
+	} );
+	YAHOO.util.Event.on('cal1222', 'click', function() { ShowHide( this.id ) } ); 
+</script>
+{/literal}
+<input type="text" name="cal1222-date" id="cal1222-date" readonly value="8/14/2007"/>
+<button type="button" id="cal1222">Change Date</button>
+<div id="cal1222-container" class="container show"></div>
+*}
+
+
+
+{foreach $messages as $message}
+<div class="message-{$message.type}">
+    <h2>{$message.text}</h2>
+</div>
+{/foreach}
+
+
 {def $currency = fetch( 'shop', 'currency' )
          $locale = false()
          $symbol = false()}
@@ -8,7 +88,7 @@
 {def $user=fetch( 'user', 'current_user' )}
 
 <div id="main-wide">
-<h1>Your recurring orders</h1>
+<h1>Auto Delivery</h1>
 {content_view_gui content_object=$user.contentobject view="address"}
 <form name="recurringorders" method="post" action={concat( "content/edit/", $user.contentobject.id )|ezurl}>
 <div class="block">
@@ -27,9 +107,9 @@
 
 
 <tr>
-    <th>Pause recurring orders</th>
+    <th>Pause Auto Delivery</th>
     <td><input name="Pause" type="checkbox" value="1" {if $collection.status|ne('1')}checked{/if} /></td>
-    <td><p>This is your holiday mode. If you are away and you wish to not receive your orders please check this box. We will also pause your recurrent orders, if we notice problems with your order request.</p></td>
+    <td><p>If you are away and you wish to not receive your orders please check this box. We will also pause your Auto Delivery, if we notice problems with your order request.</p></td>
 </tr>
 
 
@@ -66,7 +146,7 @@
     <td>{$item.price|l10n( 'currency', $locale, $symbol )}</td>
 </tr>
 <tr>
-    <th>Cycle</th>
+    <th>Frequency</th>
     <td>
     <input name="ItemArray[{$item.item_id}][cycle]" type="input" value="{$item.cycle}"/>
     {def $list=fetch('recurringorders','fetch_text')}
@@ -81,19 +161,31 @@
     </td>
 </tr>
 <tr>
-    <th>Order date</th>
-    <td>
-        <select name="ItemArray[{$item.item_id}][order_date][day]">
-        {foreach $item.days_in_cycle as $day}
-        <option value="{$day}" {if $day|eq($item.order_date_object.day)}selected{/if}>{$day}</option>
-        {/foreach}
-        </select> day of cycle
-    </td>
-    <td><p>This day will determine on which day the order is being processed. The shipped goods will arrive at your shipping location a short time thereafter.</p></td>
-</tr>
-<tr>
     <th>Next order</th>
-    <td>{$item.real_next_order_date|l10n( 'shortdate' )}</td>
+    <td>
+
+    
+
+<script type="text/javascript">
+	YAHOO.util.Event.onDOMReady( function() {ldelim}
+		YAHOO.example.calendar.cal{$item.item_id} = new YAHOO.widget.Calendar("cal{$item.item_id}","cal{$item.item_id}-container", 
+																	{ldelim}
+																	  pagedate:"{$item.next_date|datetime( 'custom', '%m/%Y' )}", 
+																	  selected:"{$item.next_date|l10n( 'shortdate' )}", 
+																	  mindate:"{fetch('recurringorders','now')|sum(86400)|l10n( 'shortdate' )}",
+																	  maxdate:"{fetch('recurringorders','now')|sum(86400)|sum(7776000)|l10n( 'shortdate' )}" {rdelim} );
+		YAHOO.example.calendar.cal{$item.item_id}.selectEvent.subscribe(handleSelect, YAHOO.example.calendar.cal{$item.item_id}, true);
+		YAHOO.example.calendar.cal{$item.item_id}.render();
+
+	{rdelim} );
+	YAHOO.util.Event.on('cal{$item.item_id}', 'click', function() {ldelim} ShowHide( this.id ) {rdelim} ); 
+</script>
+<input type="text" name="ItemArray[{$item.item_id}][next_date]" id="cal{$item.item_id}-date" readonly value="{$item.next_date|l10n( 'shortdate' )}"/>
+<button type="button" id="cal{$item.item_id}" name="cal{$item.item_id}">Change Date</button>
+<div id="cal{$item.item_id}-container" class="container hide"></div>
+    <p>This date will determine on which day the order is being processed. The shipped goods will arrive at your shipping location a short time thereafter.</p>
+    
+    </td>
     <td></td>
 </tr>
 {if $item.last_success}
@@ -118,3 +210,5 @@ Last : {$collection.last_run|l10n( 'shortdate' )}<br/>
 Now : {$collection.now|l10n( 'shortdate' )}<br/>
 -->
 </div>
+
+</div> {* YUI SAM *}
