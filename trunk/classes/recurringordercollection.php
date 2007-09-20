@@ -178,8 +178,8 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     function now()
     {
         #return 1189002190;<br />
-        return gmmktime( 0,0,0,9,2,2007 );
-        #return gmmktime( 0,0,0 );
+        #return gmmktime( 0,0,0,9,2,2007 );
+        return gmmktime( 0,0,0 );
     }
 
     function createOrder( $recurringitemlist )
@@ -296,7 +296,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     {
     	if ( count( $this->fetchDueList() ) > 0 )
     	   return true;
-    	else 
+    	else
     	   return false;
     }
     function fetchList()
@@ -312,7 +312,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         $collection->store();
         return $collection;
     }
-    function add( $object_id, $variations = null, $amount )
+    function add( $object_id, $variations = null, $amount = 0 )
     {
         return XROWRecurringOrderItem::add( $this->id, $object_id, $variations, $amount );
     }
@@ -353,7 +353,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
 
         $mail->setSender( $ini->variable( 'MailSettings', 'AdminEmail' ) );
         $mail->setReceiver( $user->attribute( 'email' ), $userobject->attribute( 'name' ) );
-        
+
 
         // fetch text from mail template
         $mailtpl =& templateInit();
@@ -410,7 +410,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     */
     function getBillingCycleTextAdjectiveArray()
     {
-        
+
         if ( !isset( $GLOBALS['xrowBillingCycleTextAdjectiveArray'] ) )
         {
             $GLOBALS['xrowBillingCycleTextAdjectiveArray'] = array (

@@ -8,7 +8,7 @@ class XROWRecurringOrderItem extends eZPersistentObject
     }
     function definition()
     {
-        return array( "fields" => array( 
+        return array( "fields" => array(
                                          "item_id" => array( 'name' => "item_id",
                                                                       'datatype' => 'integer',
                                                                       'default' => null,
@@ -56,7 +56,7 @@ class XROWRecurringOrderItem extends eZPersistentObject
                       "keys" => array( "item_id" ),
                       "increment_key" => "item_id",
                       "function_attributes" => array(
-                                                        "collection" => "collection", 
+                                                        "collection" => "collection",
                                                         "object" => "object",
                                                         'days_in_cycle' => 'daysInCycle',
                                                         "price_per_item" => "pricePerItem",
@@ -147,7 +147,7 @@ class XROWRecurringOrderItem extends eZPersistentObject
         }
         for ( $i = 1; $i <= $amount; $i++)
         {
-            $days[$i-1] = $i; 
+            $days[$i-1] = $i;
         }
         return $days;
     }
@@ -296,7 +296,49 @@ class XROWRecurringOrderItem extends eZPersistentObject
                $user_id = eZUser::currentUserID();
         return eZPersistentObject::fetchObjectList( XROWRecurringOrderItem::definition(),
                 null, array( 'user_id' => $user_id ), true );
-        
+
+    }
+
+    // returns true, if an order item exists for a given user
+    /**
+     *  @access public
+     */
+    function hasRecurringOrderItem( $contentobjectID, $userID = false )
+    {
+        $db =& eZDB::instance();
+
+        $contentobjectID = $db->escapeString( $contentobjectID );
+
+        if ( $userID == false )
+        {
+            $sql = "SELECT
+                        COUNT(*) counter
+                    FROM
+                        xrow_recurring_order_item a
+                    WHERE
+                        a.contentobject_id = '$contentobjectID'";
+        }
+        else
+        {
+            $userID = $db->escapeString( $userID );
+
+            $sql = "SELECT
+                        COUNT(*) counter
+                    FROM
+                        xrow_recurring_order_collection a,
+                        xrow_recurring_order_item b
+                    WHERE
+                        a.user_id = '$userID' and
+                        a.id = b.collection_id and
+                        b.contentobject_id = '$contentobjectID'";
+
+        }
+        $result = $db->arrayQuery( $sql );
+
+        if ( $result[0]['counter'] > 0 )
+            return true;
+        else
+            return false;
     }
 }
 ?>
