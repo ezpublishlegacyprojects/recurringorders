@@ -24,7 +24,12 @@ class xrowBillingCycle
         if ( isset( $this->PeriodAdjTextArray[$period] ) )
             $this->PeriodAdjText = $this->PeriodAdjTextArray[$period];
         else
-            $this->PeriodAdjText = '';
+        {
+            $keys = array_keys( $this->PeriodAdjTextArray );
+            $this->Period = $keys[0];
+            $this->PeriodAdjText = $this->PeriodAdjTextArray[ $keys[0] ];
+            $this->PeriodText = XROWRecurringOrderCollection::getBillingCycleText( $this->Period, $quantity );
+        }
      }
 
     function attributes()
