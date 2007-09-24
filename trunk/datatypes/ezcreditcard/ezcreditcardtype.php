@@ -91,7 +91,7 @@ class ezcreditcardType extends eZDataType
 
         if ( $http->hasPostVariable( $base . '_ezcreditcard_type_' . $contentObjectAttribute->attribute( 'id' ) ) )
         {
-            $type = $http->postVariable( $base . '_ezcreditcard_type_' . $contentObjectAttribute->attribute( 'id' ) );
+            $type = (int) $http->postVariable( $base . '_ezcreditcard_type_' . $contentObjectAttribute->attribute( 'id' ) );
 
             if ( $type == XROWCREDITCARD_TYPE_EUROCARD )
             {
@@ -266,7 +266,7 @@ class ezcreditcardType extends eZDataType
     {
         if ( $http->hasPostVariable( $base . '_ezcreditcard_type_' . $contentObjectAttribute->attribute( 'id' ) ) )
         {
-            $type = $http->postVariable( $base . '_ezcreditcard_type_' . $contentObjectAttribute->attribute( 'id' ) );
+            $type = (int) $http->postVariable( $base . '_ezcreditcard_type_' . $contentObjectAttribute->attribute( 'id' ) );
 
             if ( $type == XROWCREDITCARD_TYPE_EUROCARD )
             {
@@ -280,8 +280,8 @@ class ezcreditcardType extends eZDataType
 
                     $data['type']           = $type;
                     $data['ecname']         = $http->postVariable( $base . '_ezcreditcard_ecname_' . $contentObjectAttribute->attribute( 'id' ) );
-                    $data['accountnumber']  = $http->postVariable( $base . '_ezcreditcard_accountnumber_' . $contentObjectAttribute->attribute( 'id' ) );
-                    $data['bankcode']       = $http->postVariable( $base . '_ezcreditcard_bankcode_' . $contentObjectAttribute->attribute( 'id' ) );
+                    $data['accountnumber']  = (int) $http->postVariable( $base . '_ezcreditcard_accountnumber_' . $contentObjectAttribute->attribute( 'id' ) );
+                    $data['bankcode']       = (int) $http->postVariable( $base . '_ezcreditcard_bankcode_' . $contentObjectAttribute->attribute( 'id' ) );
 
                     if ( strlen( $data['ecname'] ) > 0
                          and $data['accountnumber'] > 0
@@ -302,7 +302,8 @@ class ezcreditcardType extends eZDataType
                     $doc = new eZDOMDocument( 'creditcard' );
                     $root = ezcreditcardType::createDOMTreefromArray( 'creditcard', $data );
                     $doc->setRoot( $root );
-                    $contentObjectAttribute->setAttribute( 'data_text', $doc->toString() );
+                    $text = $doc->toString();
+                    $contentObjectAttribute->setAttribute( 'data_text', $text );
 
                     return true;
                 }
@@ -324,8 +325,8 @@ class ezcreditcardType extends eZDataType
 
                     $data['type']           = $type;
                     $data['name']           = $http->postVariable( $base . '_ezcreditcard_name_' . $contentObjectAttribute->attribute( 'id' ) );
-                    $data['number']         = $http->postVariable( $base . '_ezcreditcard_number_' . $contentObjectAttribute->attribute( 'id' ) );
-                    $data['securitycode']   = $http->postVariable( $base . '_ezcreditcard_securitycode_' . $contentObjectAttribute->attribute( 'id' ) );
+                    $data['number']         = (int) $http->postVariable( $base . '_ezcreditcard_number_' . $contentObjectAttribute->attribute( 'id' ) );
+                    $data['securitycode']   = (int) $http->postVariable( $base . '_ezcreditcard_securitycode_' . $contentObjectAttribute->attribute( 'id' ) );
                     $data['month']          = $http->postVariable( $base . '_ezcreditcard_month_' . $contentObjectAttribute->attribute( 'id' ) );
                     $data['year']           = $http->postVariable( $base . '_ezcreditcard_year_' . $contentObjectAttribute->attribute( 'id' ) );
 
@@ -443,7 +444,7 @@ class ezcreditcardType extends eZDataType
             if ( isset( $content['type'] ) )
                 $content['type_name'] = ezcreditcardType::getCardTypeName( $content['type'] );
 
-            if ( isset( $data['has_stored_card'] ) )
+            if ( isset( $content['has_stored_card'] ) and $content['has_stored_card'] == 1 )
                 $content['has_stored_card'] = 1;
             else
                 $content['has_stored_card'] = 0;

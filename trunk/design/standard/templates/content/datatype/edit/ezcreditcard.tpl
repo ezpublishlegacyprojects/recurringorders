@@ -23,7 +23,7 @@
 {default attribute_base='ContentObjectAttribute'
          html_class='full'}
 <div class="block">
-{if and(is_set($attribute.content.has_stored_card),$attribute.content.has_stored_card)}
+{if and(is_set($attribute.content.has_stored_card),eq($attribute.content.has_stored_card,1))}
 
     <p>
         <label>{"Current stored card"|i18n('design/standard/content/datatype')}</label>
