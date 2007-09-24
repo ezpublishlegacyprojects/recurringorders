@@ -6,7 +6,7 @@
     <div class="element">
         <label>{'Quantity'|i18n('content/datatype/edit/xrowbillingcycle')}</label>
         <select id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}_quantity" class="ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" name="{$attribute_base}_data_billingcycle_quantity_{$attribute.id}">
-            {for 0 to 100 as $i}
+            {for 1 to 100 as $i}
                 <option value="{$i}"{if $i|eq($quantity)} selected="selected"{/if}>{$i}</option>
             {/for}
         </select>

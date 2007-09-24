@@ -75,7 +75,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     {
     	return array( XROWRECURRINGORDER_CYCLE_ONETIME, XROWRECURRINGORDER_CYCLE_DAY, XROWRECURRINGORDER_CYCLE_WEEK, XROWRECURRINGORDER_CYCLE_MONTH,XROWRECURRINGORDER_CYCLE_QUARTER,XROWRECURRINGORDER_CYCLE_YEAR);
     }
-    function checkCreditCard()
+    function checkCreditCard( $monthsToExpiryDate = 3)
     {
         $user = $this->attribute( 'user' );
         if ( !is_object( $user ) )
@@ -86,7 +86,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         if ( $data['month'] and $data['year'] )
         {
             $now = new eZDateTime( mktime() );
-            $now->setMonth( $now->month() + 3 );
+            $now->setMonth( $now->month() + $monthsToExpiryDate );
             $date = eZDateTime::create( -1, -1, -1, $data['month'], -1, $data['year'] );
             if ( !$date->isGreaterThan( $now ) )
             {
@@ -312,9 +312,9 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         $collection->store();
         return $collection;
     }
-    function add( $object_id, $variations = null, $amount = 0, $cycle = 1, $cycle_unit = null )
+    function add( $object_id, $variations = null, $amount = 0, $cycle_unit = null, $cycle = 1, $isSubscription = false )
     {
-        return XROWRecurringOrderItem::add( $this->id, $object_id, $variations, $amount, $cycle, $cycle_unit );
+        return XROWRecurringOrderItem::add( $this->id, $object_id, $variations, $amount, $cycle, $cycle_unit, $isSubscription );
     }
     function addHistory( $type = XROWRECURRINGORDER_STATUSTYPE_SUCCESS, $orderid = null, $text = null )
     {

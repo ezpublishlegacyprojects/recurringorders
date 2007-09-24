@@ -93,6 +93,8 @@ class XROWRecurringOrderItem extends eZPersistentObject
             case 'cycle_unit':
             case 'cycle':
             case 'order_date':
+                if ( $name == 'cycle' and $value < 1 )
+                    $value = 1;
                 $return = parent::setAttribute( $name, $value );
                 if ( $updatenextdate == true )
                     $this->setAttribute( 'next_date', $this->nextDate() );
@@ -113,11 +115,22 @@ class XROWRecurringOrderItem extends eZPersistentObject
             $nextdate = $this->attribute( 'last_success' );
         else
             $nextdate = $this->attribute( 'created' );
-    	while( $toTime >= $nextdate )
-    	{
-    	    $nextdate = $this->nextDateHelper( $nextdate );
-    	}
-    	return $nextdate;
+        if ( $this->cycle_unit != XROWRECURRINGORDER_CYCLE_ONETIME )
+        {
+            if ( $this->is_subscription )
+            {
+                $nextdate = $this->nextDateHelper( $nextdate );
+            }
+            else
+            {
+                while( $toTime >= $nextdate )
+                {
+                    $nextdate = $this->nextDateHelper( $nextdate );
+                }
+            }
+        }
+
+        return $nextdate;
     }
     function nextDate()
     {
@@ -156,44 +169,30 @@ class XROWRecurringOrderItem extends eZPersistentObject
         $datetime = new eZDateTime( $time );
         if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_MONTH )
         {
-            if ( !$this->is_subscription )
-            {
                 $datetime->setMonth( $datetime->month() + $this->cycle );
                 $datetime->setDay( $datetime->day() );
-            }
         }
         else if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_DAY )
         {
-            if ( !$this->is_subscription )
-            {
                 $datetime->setMonth( $datetime->month() );
                 $datetime->setDay( $datetime->day() + $this->cycle );
-            }
         }
         else if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_WEEK )
         {
-            if ( !$this->is_subscription )
-            {
+
                 $datetime->setMonth( $datetime->month() );
                 $datetime->setDay( $datetime->day() + ( $this->cycle * 7 ) );
-            }
         }
         else if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_QUARTER )
         {
-            if ( !$this->is_subscription )
-            {
                 $datetime->setMonth( $datetime->month() + ( $this->cycle * 3 ) );
                 $datetime->setDay( $datetime->day() );
-            }
         }
         else if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_YEAR )
         {
-            if ( !$this->is_subscription )
-            {
                 $datetime->setYear( $datetime->year() +  $this->cycle );
                 $datetime->setMonth( $datetime->month() );
                 $datetime->setDay( $datetime->day() );
-            }
         }
         return $datetime->timeStamp();
     }
@@ -271,7 +270,7 @@ class XROWRecurringOrderItem extends eZPersistentObject
         }
         parent::remove();
     }
-    function add( $collection_id, $object_id, $variations = null, $amount, $cycle = 1, $cycle_unit = null )
+    function add( $collection_id, $object_id, $variations = null, $amount, $cycle = 1, $cycle_unit = null, $isSubscription = false )
     {
         if ( $cycle_unit === null )
         {
@@ -281,13 +280,22 @@ class XROWRecurringOrderItem extends eZPersistentObject
         if ( !$amount ) // else we need a subscription handler
             return false;
 
-        $item = new XROWRecurringOrderItem( array( 'cycle' => $cycle, 'cycle_unit' => $cycle_unit, 'created' => XROWRecurringOrderCollection::now(), 'collection_id' => $collection_id, 'user_id' => eZUser::currentUserID(), 'contentobject_id' => $object_id, 'amount' => $amount ) );
+        if ( !is_numeric( $object_id ) or $object_id <= 0 )    
+            return false;
+        if ( $isSubscription )
+            $isSubscription = 1;
+        else
+            $isSubscription = 0;
+        $item = new XROWRecurringOrderItem( array( 'cycle' => $cycle, 'cycle_unit' => $cycle_unit, 'created' => XROWRecurringOrderCollection::now(), 'collection_id' => $collection_id, 'user_id' => eZUser::currentUserID(), 'contentobject_id' => $object_id, 'amount' => $amount, 'is_subscription' => $isSubscription ) );
         $item->setAttribute( 'next_date', $item->nextDate() );
         $item->store();
-        foreach ( $variations as $variation_id => $option_id )
+        if ( is_array( $variations ) )
         {
-            $option = new XROWRecurringOrderItemOption( array( 'item_id' => $item->item_id, 'variation_id' => $variation_id, 'option_id' => $option_id ) );
-            $option->store();
+            foreach ( $variations as $variation_id => $option_id )
+            {
+                $option = new XROWRecurringOrderItemOption( array( 'item_id' => $item->item_id, 'variation_id' => $variation_id, 'option_id' => $option_id ) );
+                $option->store();
+            }
         }
     }
     function fetchByUser( $user_id = null )
