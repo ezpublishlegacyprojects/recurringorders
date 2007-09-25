@@ -7,8 +7,7 @@ CREATE TABLE  `xrow_recurring_order_collection` (
   `next_try` int(10) unsigned NOT NULL DEFAULT '0',
   `last_run` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB;
-
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `xrow_recurring_order_history`;
 CREATE TABLE  `xrow_recurring_order_history` (
@@ -19,8 +18,7 @@ CREATE TABLE  `xrow_recurring_order_history` (
   `data_text` text,
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB;
-
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `xrow_recurring_order_item`;
 CREATE TABLE  `xrow_recurring_order_item` (
@@ -36,8 +34,13 @@ CREATE TABLE  `xrow_recurring_order_item` (
   `next_try` int(10) unsigned DEFAULT NULL,
   `last_success` int(10) unsigned DEFAULT NULL,
   `subscription_handler` varchar(45) DEFAULT NULL,
+  `data_text` text NOT NULL,
+  `start` int(10) unsigned NOT NULL,
+  `end` int(10) unsigned NOT NULL,
+  `canceled` int(10) unsigned NOT NULL,
+  `status` int(10) unsigned NOT NULL,
   PRIMARY KEY (`item_id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `xrow_recurring_order_item_option`;
 CREATE TABLE  `xrow_recurring_order_item_option` (
@@ -45,4 +48,5 @@ CREATE TABLE  `xrow_recurring_order_item_option` (
   `variation_id` int(10) unsigned NOT NULL DEFAULT '0',
   `option_id` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`item_id`,`variation_id`,`option_id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
