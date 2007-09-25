@@ -10,4 +10,11 @@ DisabledCycles[]
 DisabledCycles[]=0
 DisabledCycles[]=1
 
+[SubscriptionSettings]
+SubscriptionHandlerRepository[]
+SubscriptionHandlerRepository[]=recurringorders
+
+SubscriptionHandlerArray[]
+SubscriptionHandlerArray[]=xrowdefault
+
 */ ?>
