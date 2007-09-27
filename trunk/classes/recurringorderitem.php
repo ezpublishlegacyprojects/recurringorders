@@ -1,25 +1,9 @@
 <?php
 include_once( 'extension/recurringorders/classes/recurringordercollection.php');
 
-define( "XROW_SUBSCRIPTION_STATUS_UNDEFINED", 0 );
-define( "XROW_SUBSCRIPTION_STATUS_TRIAL", 1 );
-define( "XROW_SUBSCRIPTION_STATUS_ACTIVE", 2 );
-define( "XROW_SUBSCRIPTION_STATUS_PENDING", 3 );
-define( "XROW_SUBSCRIPTION_STATUS_SUSPENDED", 4 );
-define( "XROW_SUBSCRIPTION_STATUS_OVERDUE", 5 ); #Do we need it?
-define( "XROW_SUBSCRIPTION_STATUS_CANCELED", 6 );
-define( "XROW_SUBSCRIPTION_STATUS_DELETED", 7 );
-define( "XROW_SUBSCRIPTION_STATUS_NOT_SUBSCRIPED", 8 );
-define( "XROW_SUBSCRIPTION_STATUS_INIT_ACTIVE", 9 );
-
-define( "XROW_SUBSCRIPTION_ACTION_SIGNUP", 'signup' );
-define( "XROW_SUBSCRIPTION_ACTION_CANCLE", 'cancle' );
-define( "XROW_SUBSCRIPTION_ACTION_REMOVE", 'remove' );
-define( "XROW_SUBSCRIPTION_ACTION_SUSPEND", 'suspend' );
-
 class XROWRecurringOrderItem extends eZPersistentObject
 {
-    function XROWRecurringOrderItem( $row )
+    function XROWRecurringOrderItem( $row = array() )
     {
         parent::eZPersistentObject( $row );
     }
@@ -122,6 +106,21 @@ class XROWRecurringOrderItem extends eZPersistentObject
                 $return = $c->attribute( 'last_run' );
             }break;
 
+            case 'content':
+            {
+                $content = array();
+                if ( $this->attribute( 'is_subscription' ) == 1 )
+                {
+                    $subscriptionHandler = new xrowSubscription( $this->attribute( 'subscription_handler' ) );
+
+                    $handler = $subscriptionHandler->getHandler();
+
+                    if ( is_object( $handler ) )
+                        $content = $handler->createArrayfromXML( $this->attribute( 'data_text' )  );
+                }
+                return $content;
+            }break;
+
             default:
             {
                 $return = parent::attribute( $name );
@@ -147,6 +146,28 @@ class XROWRecurringOrderItem extends eZPersistentObject
                 $return = parent::setAttribute( $name, $value );
                 $this->setAttribute( 'next_date', $this->nextDate() );
             break;
+            case 'content':
+            {
+                $dataText = '';
+                $handlerIdentifier = $this->attribute( 'subscription_handler' );
+                if ( strlen( $handlerIdentifier ) > 0 and
+                     $this->attribute( 'is_subscription' ) == 1 )
+                {
+                    $subscriptionHandler = new xrowSubscription( $handlerIdentifier );
+                    $handler = $subscriptionHandler->getHandler();
+                    if ( is_object( $handler ) )
+                    {
+                        $handler = $subscriptionHandler->getHandler();
+
+                        $domnode = $handler->createDOMTreefromArray( 'item-info', $value );
+                        $doc = new eZDOMDocument();
+                        $doc->setName( "ItemInfo" );
+                        $doc->setRoot( $domnode );
+                        $dataText = $doc->toString();
+                    }
+                }
+                $return = parent::setAttribute( 'data_text', $dataText );
+            }break;
             default:
                 $return = parent::setAttribute( $name, $value );
             break;
@@ -156,7 +177,7 @@ class XROWRecurringOrderItem extends eZPersistentObject
 
     function forwardNextDate( $toTime )
     {
-        if ( $this->last_success )
+        if ( $this->attribute( 'last_success' ) )
             $nextdate = $this->attribute( 'last_success' );
         else
             $nextdate = $this->attribute( 'created' );
@@ -253,7 +274,7 @@ class XROWRecurringOrderItem extends eZPersistentObject
             return false;
     }
 
-    function &object()
+    function object()
     {
         $object = eZContentObject::fetch( $this->contentobject_id );
         return $object;
@@ -338,9 +359,11 @@ class XROWRecurringOrderItem extends eZPersistentObject
                   $end = 0,
                   $canceled = 0,
                   $data = array(),
-                  $subscriptionHandler = '',
+                  $subscriptionIdentifier = '',
                   $status = XROW_SUBSCRIPTION_STATUS_UNDEFINED )
     {
+        $item = new XROWRecurringOrderItem();
+
         if ( $cycle_unit === null )
         {
             $ini = eZINI::instance( 'recurringorders.ini' );
@@ -352,10 +375,15 @@ class XROWRecurringOrderItem extends eZPersistentObject
         if ( !is_numeric( $object_id ) or $object_id <= 0 )
             return false;
 
+        $dataText = '';
         if ( $isSubscription )
-            $isSubscription = 1;
+        {
+            $item->setAttribute( 'is_subscription', 1 );
+            $item->setAttribute( 'subscription_handler', $subscriptionIdentifier );
+            $item->setAttribute( 'content', $data );
+        }
         else
-            $isSubscription = 0;
+            $item->setAttribute( 'is_subscription', 0 );
 
         if ( $start == 0 )
             $start = XROWRecurringOrderCollection::now();
@@ -364,17 +392,18 @@ class XROWRecurringOrderItem extends eZPersistentObject
                       'cycle_unit' => $cycle_unit,
                       'created' => XROWRecurringOrderCollection::now(),
                       'collection_id' => $collection_id,
-                      'user_id' => eZUser::currentUserID(),
                       'contentobject_id' => $object_id,
                       'amount' => $amount,
-                      'is_subscription' => $isSubscription,
-                      'subscription_handler' => $subscriptionHandler,
                       'end' => $end,
                       'start' => $start,
                       'canceled' => $canceled,
-                      'data_text' => $dataText );
+                      'status' => $status );
 
-        $item = new XROWRecurringOrderItem( $row );
+        foreach ( $row as $key => $value )
+        {
+            $item->setAttribute( $key, $value );
+        }
+
         $item->setAttribute( 'next_date', $item->nextDate() );
         $item->store();
 
@@ -382,7 +411,9 @@ class XROWRecurringOrderItem extends eZPersistentObject
         {
             foreach ( $variations as $variation_id => $option_id )
             {
-                $option = new XROWRecurringOrderItemOption( array( 'item_id' => $item->item_id, 'variation_id' => $variation_id, 'option_id' => $option_id ) );
+                $option = new XROWRecurringOrderItemOption( array( 'item_id' => $item->item_id,
+                                                                   'variation_id' => $variation_id,
+                                                                   'option_id' => $option_id ) );
                 $option->store();
             }
         }
@@ -438,24 +469,5 @@ class XROWRecurringOrderItem extends eZPersistentObject
         else
             return false;
     }
-
-    function createDOMTreeFromArray( $content )
-    {
-        $doc = new eZDOMDocument( 'RecurringOrderInfo' );
-        $root = $doc->createElementNode( 'related-objects' );
-        $relationList = $doc->createElementNode( 'relation-list' );
-        foreach ( $content as $relationItem )
-        {
-            unset( $relationElement );
-            $relationElement = $doc->createElementNode( 'relation-item' );
-            $relationElement->appendAttributes( $relationItem,
-                                                array( 'contentobject-id' => 'contentobject-id' ) );
-            $relationList->appendChild( $relationElement );
-        }
-        $root->appendChild( $relationList );
-        $doc->setRoot( $root );
-        return $doc;
-    }
-
 }
 ?>

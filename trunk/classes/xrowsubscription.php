@@ -1,62 +1,76 @@
 <?php
 
 include_once( eZExtension::baseDirectory() . '/recurringorders/classes/recurringordercollection.php');
+include_once( eZExtension::baseDirectory() . '/recurringorders/classes/subscription_handler/xrowdefaultsubscriptionhandler.php');
+
+define( "XROW_SUBSCRIPTION_STATUS_UNDEFINED", 0 );
+define( "XROW_SUBSCRIPTION_STATUS_TRIAL", 1 );
+define( "XROW_SUBSCRIPTION_STATUS_ACTIVE", 2 );
+define( "XROW_SUBSCRIPTION_STATUS_PENDING", 3 );
+define( "XROW_SUBSCRIPTION_STATUS_SUSPENDED", 4 );
+define( "XROW_SUBSCRIPTION_STATUS_OVERDUE", 5 ); #Do we need it?
+define( "XROW_SUBSCRIPTION_STATUS_CANCELED", 6 );
+define( "XROW_SUBSCRIPTION_STATUS_DELETED", 7 );
+define( "XROW_SUBSCRIPTION_STATUS_NOT_SUBSCRIPED", 8 );
+define( "XROW_SUBSCRIPTION_STATUS_INIT_ACTIVE", 9 );
 
 class xrowSubscription
 {
  	function xrowSubscription( $handlerIdentifier = 'default' )
  	{
-        $this->handleName = $handlerIdentifier;
-        $this->handleArray = $this->getHandlerArray();
-        $this->handle = $this->getHandler( $handlerIdentifier );
+        $this->handlerIdentifier = $handlerIdentifier;
+        $this->handlerArray = $this->getHandlerArray();
  	}
 
     function getHandlerArray()
     {
-        $ini =& eZINI::instance( 'recurringorders.ini' );
-        $subscriptionArray = $ini->variable( 'SubscriptionSettings', 'SubscriptionHandlerArray' );
-        $repositoryArray = $ini->variable( 'SubscriptionSettings', 'SubscriptionHandlerRepository' );
-
-        foreach ( $subscriptionArray as $subscription )
+        if ( count( $this->handlerArray ) == 0 )
         {
-            foreach ( $repositoryArray as $repository )
+            $ini =& eZINI::instance( 'recurringorders.ini' );
+            $subscriptionArray = $ini->variable( 'SubscriptionSettings', 'SubscriptionHandlerArray' );
+            $repositoryArray = $ini->variable( 'SubscriptionSettings', 'SubscriptionHandlerRepository' );
+
+            foreach ( $subscriptionArray as $subscription )
             {
-                $fileName = eZExtension::baseDirectory() . "/$repository/classes/subscription_handler/" . strtolower( $subscription ) . 'subscriptionhandler.php';
-                eZDebug::writeDebug( $fileName, 'file' );
-                if ( file_exists( $fileName ) )
-                {
-                    include_once( $fileName );
-                    $className = $subscription . 'SubscriptionHandler';
-                    $this->handlerArray[$subscription] = new $className();
-                    continue;
-                }
+                if ( !$this->findHandler( $subscription, $repositoryArray ) )
+                    eZDebug::writeError( $subscription . ': No file for inclusion found.',
+                                         'xrowSubcription::getHandlerArray' );
             }
-            if ( !isset( $this->handlerArray[$subscription] ) )
-                eZDebug::writeError( $subscription . ': No file for inclusion found.', 'xrowSubcription::getHandlerArray' );
         }
+        return $this->handlerArray;
     }
 
-    function getHandler( $handlerIdentifier )
+    function findHandler( $subscription, $repositoryArray )
     {
-        if ( isset( $this->handlerArray[$handlerIdentifier] ) )
-            return $this->handlerArray[$handlerIdentifier];
+        foreach ( $repositoryArray as $repository )
+        {
+            $fileName = eZExtension::baseDirectory() . "/$repository/classes/subscription_handler/" .
+                        strtolower( $subscription ) . 'subscriptionhandler.php';
+            if ( file_exists( $fileName ) )
+            {
+                include_once( $fileName );
+                $this->handlerArray[$subscription] = $subscription;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function getHandler( $itemID = false )
+    {
+        if ( count( $this->handlerArray ) == 0 )
+            return false;
+
+        if ( in_array( $this->handlerIdentifier, $this->handlerArray ) )
+        {
+            $className = $this->handlerIdentifier . 'SubscriptionHandler';
+            return new $className( $itemID );
+        }
         else
             return false;
     }
 
- 	function remove( $handlerIdentifier = false )
- 	{
- 	}
- 	function signup()
- 	{
- 	}
-
- 	function suspend()
- 	{
- 	}
-
- 	var $handle;
- 	var $handlerIdentifier;
- 	var $handlerArray;
+    var $handlerIdentifier;
+ 	var $handlerArray = array();
 }
 ?>

@@ -20,6 +20,7 @@ include_once( 'extension/recurringorders/classes/recurringorderitem.php');
 include_once( 'extension/recurringorders/classes/recurringorderitemoption.php');
 include_once( 'lib/ezutils/classes/ezoperationhandler.php' );
 include_once( 'kernel/shop/classes/ezshopfunctions.php' );
+include_once( 'extension/recurringorders/classes/xrowsubscription.php');
 
 class XROWRecurringOrderCollection extends eZPersistentObject
 {
@@ -27,6 +28,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     {
         parent::eZPersistentObject( $row );
     }
+
     function definition()
     {
         return array( "fields" => array(
@@ -71,10 +73,12 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     	$this->setAttribute( 'last_run', XROWRecurringOrderCollection::now() );
     	$this->store();
     }
+
     function getAllCycleTypes()
     {
     	return array( XROWRECURRINGORDER_CYCLE_ONETIME, XROWRECURRINGORDER_CYCLE_DAY, XROWRECURRINGORDER_CYCLE_WEEK, XROWRECURRINGORDER_CYCLE_MONTH,XROWRECURRINGORDER_CYCLE_QUARTER,XROWRECURRINGORDER_CYCLE_YEAR);
     }
+
     function checkCreditCard( $monthsToExpiryDate = 3)
     {
         $user = $this->attribute( 'user' );
@@ -102,6 +106,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
             return XROWRECURRINGORDER_ERROR_CREDITCARD_MISSING;
         }
     }
+
     function creditCardExpiryDate()
     {
     	$user = $this->attribute( 'user' );
@@ -120,6 +125,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
             return null;
         }
     }
+
     function hadErrorSince( $days )
     {
         $db = eZDB::instance();
@@ -129,6 +135,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         $result = $db->arrayQuery( "SELECT count( id ) as counter FROM xrow_recurring_order_history x WHERE x.date > " . $date->timeStamp() . " and x.collection_id = " . $this->id );
         return ( $result[0]['counter'] > 0 );
     }
+
     function failuresSinceLastSuccess()
     {
         $db = eZDB::instance();
@@ -138,6 +145,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         $result = $db->arrayQuery( "SELECT count( id ) as counter FROM xrow_recurring_order_history x WHERE x.date > " . $date . " and x.collection_id = " . $this->id );
         return $result[0]['counter'];
     }
+
     function canTry()
     {
         if ( (int)$this->next_try < mktime() )
@@ -145,10 +153,12 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         else
             return false;
     }
+
     function &user()
     {
         return eZUser::fetch( $this->user_id );
     }
+
     function createDOMTreefromArray( $name, $array )
     {
 
@@ -174,6 +184,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         }
         return $root;
     }
+
     // function needed for testing mod_fcgid does restart with a future date.
     function now()
     {
@@ -261,6 +272,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
 
         return $order;
     }
+
     function fetchByUser( $user_id = null )
     {
         if ( $user_id === null )
@@ -269,17 +281,20 @@ class XROWRecurringOrderCollection extends eZPersistentObject
                 null, array( 'user_id' => $user_id ), true );
 
     }
+
     function fetchAll()
     {
         return eZPersistentObject::fetchObjectList( XROWRecurringOrderCollection::definition(),
                 null, null, true );
 
     }
+
     function fetch( $collection_id )
     {
     	return eZPersistentObject::fetchObject( XROWRecurringOrderCollection::definition(),
                 null, array( "id" => $collection_id ), true );
     }
+
     function fetchDueList()
     {
         $list = eZPersistentObject::fetchObjectList( XROWRecurringOrderItem::definition(),
@@ -292,6 +307,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         }
         return $result;
     }
+
     function isDue()
     {
     	if ( count( $this->fetchDueList() ) > 0 )
@@ -299,11 +315,13 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     	else
     	   return false;
     }
+
     function fetchList()
     {
         return eZPersistentObject::fetchObjectList( XROWRecurringOrderItem::definition(),
                 null, array( 'collection_id' => $this->id ), true );
     }
+
     function createNew( $user_id = null )
     {
         if ( $user_id === null )
@@ -312,10 +330,36 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         $collection->store();
         return $collection;
     }
-    function add( $object_id, $variations = null, $amount = 0, $cycle_unit = null, $cycle = 1, $isSubscription = false )
+
+    function add( $object_id,
+                  $variations = null,
+                  $amount = 0,
+                  $cycle_unit = null,
+                  $cycle = 1,
+                  $isSubscription = false,
+                  $start = 0,
+                  $end = 0,
+                  $canceled = 0,
+                  $data = array(),
+                  $subscriptionIdentifier = '',
+                  $status = XROW_SUBSCRIPTION_STATUS_UNDEFINED
+                   )
     {
-        return XROWRecurringOrderItem::add( $this->id, $object_id, $variations, $amount, $cycle, $cycle_unit, $isSubscription );
+        return XROWRecurringOrderItem::add( $this->id,
+                                            $object_id,
+                                            $variations,
+                                            $amount,
+                                            $cycle,
+                                            $cycle_unit,
+                                            $isSubscription,
+                                            $start,
+                                            $end,
+                                            $canceled,
+                                            $data,
+                                            $subscriptionIdentifier,
+                                            $status );
     }
+
     function addHistory( $type = XROWRECURRINGORDER_STATUSTYPE_SUCCESS, $orderid = null, $text = null )
     {
         $row = array( 'date' => mktime(), 'type' => $type, 'data_text' => $text, 'order_id' => $orderid, 'collection_id' => $this->id );
@@ -334,6 +378,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
             $this->store();
         }
     }
+
     function hasSubscription( $object_id )
     {
         $return = XROWRecurringOrderItem::fetchObject( XROWRecurringOrderItem::definition(), null, array( 'contentobject_id' => $object_id, 'is_subscription' => '1' ) );
@@ -342,6 +387,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         else
             return false;
     }
+
     function sendMail( $template, $params )
     {
         $user = $this->attribute( 'user' );
@@ -377,6 +423,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
             return false;
         }
     }
+
     /*!
      \static
      fetch text array of available billing cycles
@@ -476,6 +523,5 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         return '';
 
     }
-
 }
 ?>
