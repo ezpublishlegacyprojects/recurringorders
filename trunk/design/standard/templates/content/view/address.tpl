@@ -3,10 +3,10 @@
 <table class="list">
 <tr>
     <th SCOPE=col colspan=2>
-    {if eq($object.data_map.shipping.content,1)}
-    <b>{"Address"|i18n("design/standard/shop")}</b>
-    {else}
+    {if $object.data_map.shippingaddress.content|eq(0)}
     <b>{"Billing Address"|i18n("design/standard/shop")}</b>
+    {else}
+    <b>{"Shipping and Billing Address"|i18n("design/standard/shop")}</b>
     {/if}
     </th>
 </tr>
@@ -25,7 +25,7 @@
 <tr><th>{'Shipping'|i18n('design/standard/shop')}:</th><td>{attribute_view_gui attribute=$object.data_map.shippingtype}</td></tr>
 </table>
 
-{if eq($object.data_map.shippingaddress.content,0)}
+{if $object.data_map.shippingaddress.content|eq(0)}
 
 <table class="list">
 <tr>

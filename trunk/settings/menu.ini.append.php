@@ -5,11 +5,11 @@ Part[recurringorders]=Recurring orders
 Tabs[]=recurringorders
 
 [Topmenu_recurringorders]
-NavigationPartIdentifier=recurringorders
+NavigationPartIdentifier=ezrecurringorders
 Name=Recurring orders
 Tooltip=Recurring orders adn subscriptions
 URL[]
-URL[default]=/recurringorders/revenue
+URL[default]=/recurringorders/forecast
 Enabled[]
 Enabled[default]=true
 Enabled[browse]=false

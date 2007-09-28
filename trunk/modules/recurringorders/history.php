@@ -24,7 +24,7 @@ $tpl->setVariable( "module", $Module );
 $tpl->setVariable( 'view_parameters', $viewParameters );
 
 $Result = array();
-
+$Result['left_menu'] = "design:parts/xrowrecurringorders/menu.tpl";
 $Result['content'] = $tpl->fetch( "design:recurringorders/history.tpl" );
 $Result['path'] = array( array( 'url' => false,
                         'text' => 'Recurring orders' ) );

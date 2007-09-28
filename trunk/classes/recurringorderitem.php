@@ -7,7 +7,6 @@ class XROWRecurringOrderItem extends eZPersistentObject
     {
         parent::eZPersistentObject( $row );
     }
-
     function definition()
     {
         return array( "fields" => array(
@@ -90,7 +89,7 @@ class XROWRecurringOrderItem extends eZPersistentObject
                       "sort" => array( "created" => "asc" ),
                       "name" => "xrow_recurring_order_item" );
     }
-
+    
     function collection()
     {
     	return XROWRecurringOrderCollection::fetch( $this->collection_id );
@@ -174,7 +173,20 @@ class XROWRecurringOrderItem extends eZPersistentObject
         }
         return $return;
     }
-
+    /**
+     * Enter description here...
+     *
+     * @access public
+     * @return boolean
+     */
+    function isValid()
+    {
+        $object = $this->attribute( 'object' );
+        if ( !is_object( $object ) )
+            return false;
+        else 
+            return true;
+    }
     function forwardNextDate( $toTime )
     {
         if ( $this->attribute( 'last_success' ) )

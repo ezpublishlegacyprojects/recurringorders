@@ -68,6 +68,17 @@ class XROWRecurringOrderCollection extends eZPersistentObject
                       "sort" => array( "id" => "asc" ),
                       "name" => "xrow_recurring_order_collection" );
     }
+    /**
+     * Time function needed for testing mod_fcgid doesn`t restart with a future date.
+     *
+     * @return int
+     */
+    function now()
+    {
+        #return 1189002190;<br />
+        return gmmktime( 0,0,0,10,17,2007 );
+        #return gmmktime( 0,0,0 );
+    }
     function markRun()
     {
     	$this->setAttribute( 'last_run', XROWRecurringOrderCollection::now() );
@@ -148,7 +159,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
 
     function canTry()
     {
-        if ( (int)$this->next_try < mktime() )
+        if ( (int)$this->next_try <= XROWRecurringOrderCollection::now() )
             return true;
         else
             return false;
@@ -184,15 +195,6 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         }
         return $root;
     }
-
-    // function needed for testing mod_fcgid does restart with a future date.
-    function now()
-    {
-        #return 1189002190;<br />
-        #return gmmktime( 0,0,0,9,2,2007 );
-        return gmmktime( 0,0,0 );
-    }
-
     function createOrder( $recurringitemlist )
     {
         if ( count( $recurringitemlist ) == 0 )
@@ -281,20 +283,29 @@ class XROWRecurringOrderCollection extends eZPersistentObject
                 null, array( 'user_id' => $user_id ), true );
 
     }
-
+    /**
+     *
+     * @return array array of XROWRecurringOrderCollection
+     */
     function fetchAll()
     {
         return eZPersistentObject::fetchObjectList( XROWRecurringOrderCollection::definition(),
                 null, null, true );
 
     }
-
+    /**
+     *
+     * @return XROWRecurringOrderCollection
+     */
     function fetch( $collection_id )
     {
     	return eZPersistentObject::fetchObject( XROWRecurringOrderCollection::definition(),
                 null, array( "id" => $collection_id ), true );
     }
-
+    /**
+     *
+     * @return array array of XROWRecurringOrderCollection
+     */
     function fetchDueList()
     {
         $list = eZPersistentObject::fetchObjectList( XROWRecurringOrderItem::definition(),
@@ -315,13 +326,19 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     	else
     	   return false;
     }
-
+    /**
+     *
+     * @return array array of XROWRecurringOrderCollection
+     */
     function fetchList()
     {
         return eZPersistentObject::fetchObjectList( XROWRecurringOrderItem::definition(),
                 null, array( 'collection_id' => $this->id ), true );
     }
-
+    /**
+     *
+     * @return XROWRecurringOrderCollection
+     */
     function createNew( $user_id = null )
     {
         if ( $user_id === null )
@@ -359,24 +376,31 @@ class XROWRecurringOrderCollection extends eZPersistentObject
                                             $subscriptionIdentifier,
                                             $status );
     }
-
-    function addHistory( $type = XROWRECURRINGORDER_STATUSTYPE_SUCCESS, $orderid = null, $text = null )
+    /**
+     *
+     * @return void
+     */
+    function addHistory( $type = XROWRECURRINGORDER_STATUSTYPE_SUCCESS, $text = null, $orderid = null )
     {
-        $row = array( 'date' => mktime(), 'type' => $type, 'data_text' => $text, 'order_id' => $orderid, 'collection_id' => $this->id );
+        $db =& eZDB::instance();
+        $db->begin();
+        $ini = eZINI::instance( 'recurringorders.ini' );
+        $row = array( 'date' => gmmktime(), 'type' => $type, 'data_text' => $text, 'order_id' => $orderid, 'collection_id' => $this->id );
         $item = new XROWRecurringOrderHistory( $row );
         $item->store();
-        if ( $type == XROWRECURRINGORDER_STATUSTYPE_SUCCESS )
+        if ( $type != XROWRECURRINGORDER_STATUSTYPE_SUCCESS )
         {
-            $date = new eZDateTime( mktime() );
-            $date->setDay( $date->day() + 2 );
+            $date = new eZDateTime( XROWRecurringOrderCollection::now() );
+            $date->setDay( $date->day() + $ini->variable( 'GeneralSettings', 'DaysAfterRetryOnError' ) );
             $this->setAttribute( 'next_try', $date->timeStamp() );
-            if ( $this->failuresSinceLastSuccess() >= 3 )
+            if ( ( $ini->variable( 'RecurringOrderSettings', 'FailuresTillPause' ) > 1 ) and $this->failuresSinceLastSuccess() >= $ini->variable( 'RecurringOrderSettings', 'FailuresTillPause' ) )
             {
                 $this->setAttribute( 'status', XROWRECURRINGORDER_STATUS_DEACTIVATED );
-                $collection->sendMail( 'design:recurringorders/email/manyfailures.tpl' );
+                $this->sendMail( 'design:recurringorders/email/manyfailures.tpl' );
             }
             $this->store();
         }
+        $db->commit();
     }
 
     function hasSubscription( $object_id )
@@ -388,7 +412,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
             return false;
     }
 
-    function sendMail( $template, $params )
+    function sendMail( $template, $params = array() )
     {
         $user = $this->attribute( 'user' );
         $userobject = $user->attribute( 'contentobject' );
@@ -400,7 +424,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         $mail->setSender( $ini->variable( 'MailSettings', 'AdminEmail' ) );
         $mail->setReceiver( $user->attribute( 'email' ), $userobject->attribute( 'name' ) );
 
-
+        include_once( 'kernel/common/template.php' );
         // fetch text from mail template
         $mailtpl =& templateInit();
         foreach ( $params as $key => $value )
@@ -408,7 +432,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
             $mailtpl->setVariable( $key, $value );
         }
         $mailtext =& $mailtpl->fetch( $template );
-        $subject = $tpl->variable( 'subject' );
+        $subject = $mailtpl->variable( 'subject' );
         $mail->setSubject( $subject );
         $mail->setBody( $mailtext );
 

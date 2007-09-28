@@ -62,8 +62,9 @@ foreach ( $list as $collection )
     $cccheck = $collection->checkCreditCard();
     if ( $cccheck !== true )
     {
-        XROWRecurringOrderHistory::add( XROWRECURRINGORDER_STATUSTYPE_CREDITCARD_EXPIRES, $collection->id, 'Creditcard expires' );
         $collection->sendMail( 'design:recurringorders/email/check_payment.tpl' );
+        $collection->addHistory( XROWRECURRINGORDER_STATUSTYPE_CREDITCARD_EXPIRES, 'Creditcard expires' );
+        
         // creditcard error
         $cli->output( "Collection #" . $collection->id . ' creditcard error' );
         continue;
@@ -82,8 +83,22 @@ foreach ( $list as $collection )
         continue;
     }
     $items = $collection->fetchDueList();
+    foreach ( $items as $key => $item )
+    {
+        //@todo check if all items are valid
+        if ( !$item->isValid() )
+        {
+            $collection->sendMail( 'design:recurringorders/email/item_not_available.tpl' );
+            $item->remove();
+            unset( $items[$key] );
+        }
+    }
+    if ( count( $items ) == 0 )
+    {
+        $cli->output( "Collection #" . $collection->id . " is empty after checking for validity." );
+        continue;
+    }
     
-    //TODO check if all items are valid
     
     $order = $collection->createOrder( $items );
 
@@ -108,18 +123,18 @@ foreach ( $list as $collection )
         {
             if (  isset( $operationResult['redirect_url'] ) )
             {
-                XROWRecurringOrderHistory::add( XROWRECURRINGORDER_STATUSTYPE_FAILURE, $collection->id, $order->id, "Order has been processed with a strange result.", $order->id);
+                $collection->addHistory( XROWRECURRINGORDER_STATUSTYPE_FAILURE, "Order has been processed with a strange result.", $order->ID);
                 continue;
             }
             else if ( isset( $operationResult['result'] ) )
             {
-                XROWRecurringOrderHistory::add( XROWRECURRINGORDER_STATUSTYPE_FAILURE, $collection->id, $order->id, "Order has been processed with a strange result.", $order->id);
+                $collection->addHistory( XROWRECURRINGORDER_STATUSTYPE_FAILURE, "Order has been processed with a strange result.", $order->ID);
                 continue;
             }
         }break;
         case EZ_MODULE_OPERATION_CANCELED:
         {
-            XROWRecurringOrderHistory::add( XROWRECURRINGORDER_STATUSTYPE_FAILURE, $collection->id, "Order has been CANCELED.", $order->id);
+            $collection->addHistory( XROWRECURRINGORDER_STATUSTYPE_FAILURE, "Order has been CANCELED.", $order->ID);
             continue;
         }
     }
@@ -132,7 +147,7 @@ foreach ( $list as $collection )
         $item->store();
         $cli->output( "  Item #" . $item->item_id . " next order is on " . strftime( "%d.%m.%Y", $item->attribute( 'next_date' ) ) );
     }
-    XROWRecurringOrderHistory::add( XROWRECURRINGORDER_STATUSTYPE_SUCCESS, $collection->id, "Order has been completed.", $order->ID );
+    $collection->addHistory( XROWRECURRINGORDER_STATUSTYPE_SUCCESS, "Order has been completed.", $order->ID );
 }
 $cli->output( "Recurring Orders processed" );
 

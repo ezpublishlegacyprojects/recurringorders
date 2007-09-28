@@ -7,7 +7,7 @@ $ViewList["add"] = array(
     "script" => "add.php"
 );
 $ViewList["list"] = array( 
-            "default_navigation_part" => 'ezshopnavigationpart',
+            "default_navigation_part" => 'xrowrecurringorders',
             "functions" => array( 'buy' ),
             'single_post_actions' => array( 'Remove' => 'Remove',
                                             'Cancel' => 'Cancel',
@@ -24,12 +24,12 @@ $ViewList["list"] = array(
             'params' => array( 'CollectionID' ),
             'script' => 'list.php' );
 $ViewList['history'] = array(
-    "default_navigation_part" => 'ezshopnavigationpart',
+    "default_navigation_part" => 'xrowrecurringorders',
     'functions' => array( 'administrate' ),
     'params' => array( 'Offset' ),
     'script' => 'history.php' );
 $ViewList['forecast'] = array(
-    "default_navigation_part" => 'ezshopnavigationpart',
+    "default_navigation_part" => 'xrowrecurringorders',
     'functions' => array( 'administrate' ),
     'script' => 'forecast.php' );
 $FunctionList['administrate'] = array( );

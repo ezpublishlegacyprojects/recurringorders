@@ -79,7 +79,7 @@ if ( $collection->checkCreditCard() !== true )
 $tpl->setVariable( 'messages', $messages );
 $tpl->setVariable( 'collection', $collection );
 $Result = array();
-
+$Result['left_menu'] = "design:parts/xrowrecurringorders/menu.tpl";
 $Result['content'] = $tpl->fetch( "design:recurringorders/list.tpl" );
 $Result['path'] = array( array( 'url' => false,
                         'text' => 'Recurring orders' ) );

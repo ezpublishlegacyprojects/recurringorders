@@ -6,7 +6,10 @@ include_once( 'extension/recurringorders/classes/recurringordercollection.php');
 $Module =& $Params['Module'];
 include_once( 'kernel/common/template.php' );
 $tpl =& templateInit();
-$offset = $Params['Offset'];
+if ( isset( $Params['Offset'] ) )
+    $offset = $Params['Offset'];
+else
+    $offset = 0;
 $limit = 10;
 
 $http =& eZHTTPTool::instance();
@@ -34,7 +37,7 @@ foreach ( $list as $item )
         $list_result[$item->contentobject_id]['variations'][$key]['options'] = $options;
 
     }
-    if ( !isset( $list_result[$item->contentobject_id][$key]['cycles'][$item->cycle_unit] ) )
+    if ( !isset( $list_result[$item->contentobject_id]['variations'][$key]['cycles'][$item->cycle_unit] ) )
     {
         $list_result[$item->contentobject_id]['variations'][$key]['cycles'][$item->cycle_unit] = array();
         $list_result[$item->contentobject_id]['variations'][$key]['cycles'][$item->cycle_unit]['amount'] = $item->amount / $item->cycle;
@@ -47,7 +50,7 @@ foreach ( $list as $item )
         $list_result[$item->contentobject_id]['variations'][$key]['cycles'][$item->cycle_unit]['amount'] += $item->amount / $item->cycle;
         $list_result[$item->contentobject_id]['variations'][$key]['cycles'][$item->cycle_unit]['total_price'] += $item->pricePerItem() * $item->amount / $item->cycle;
     }
-    if (isset($totals[$item->cycle_unit]))
+    if ( !isset( $totals[$item->cycle_unit] ) )
     {
         $totals[$item->cycle_unit] = $item->pricePerItem() * $item->amount / $item->cycle;
     }
@@ -67,8 +70,7 @@ $tpl->setVariable( 'view_parameters', $viewParameters );
 $tpl->setVariable( 'cycles', XROWRecurringOrderCollection::getAllCycleTypes() );
 $Result = array();
 
-$Result['left_menu'] = "design:parts/ezshop/menu.tpl";
-
+$Result['left_menu'] = "design:parts/xrowrecurringorders/menu.tpl";
 $Result['content'] = $tpl->fetch( "design:recurringorders/forecast.tpl" );
 $Result['path'] = array( array( 'url' => false,
                         'text' => 'Recurring orders' ),

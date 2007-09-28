@@ -3,7 +3,7 @@
 <div class="context-block">
 {* DESIGN: Header START *}<div class="box-header"><div class="box-tc"><div class="box-ml"><div class="box-mr"><div class="box-tl"><div class="box-tr">
 
-<h1 class="context-title">{'Recurring forecast [%forecast]'|i18n( 'design/admin/shop/customerlist',, hash( '%forecast', $list_count ) )}</h1>
+<h1 class="context-title">{'Forecast [%forecast]'|i18n( 'design/admin/shop/customerlist',, hash( '%forecast', $list_count ) )}</h1>
 
 {* DESIGN: Mainline *}<div class="header-mainline"></div>
 
@@ -20,7 +20,7 @@
 {foreach $list as $item sequence array( bglight, bgdark ) as $sequence }
 
     <tr class="{$sequence}">
-        <th class="wide" colspan="7">{$item.object.name}</th>
+        <th class="wide" colspan="7"><a href={$item.object.main_node.url_alias|ezurl}>{$item.object.name}</a></th>
     </tr>
     <tr class="{$sequence}">
     {set $trow=0}
