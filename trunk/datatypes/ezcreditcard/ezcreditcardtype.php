@@ -283,21 +283,7 @@ class ezcreditcardType extends eZDataType
                     $data['accountnumber']  = $http->postVariable( $base . '_ezcreditcard_accountnumber_' . $contentObjectAttribute->attribute( 'id' ) );
                     $data['bankcode']       = $http->postVariable( $base . '_ezcreditcard_bankcode_' . $contentObjectAttribute->attribute( 'id' ) );
 
-                    if ( strlen( $data['ecname'] ) > 0
-                         and $data['accountnumber'] > 0
-                         and $data['bankcode'] > 0 )
-                        $data['has_stored_card'] = 1;
-                    else
-                        $data['has_stored_card'] = 0;
-
-                    if ( $data['accountnumber'] > 0 )
-                        $data['accountnumber'] = ezcreditcardType::gpgEncode( $data['accountnumber'] );
-
-                    if ( strlen( $data['ecname'] ) > 0 )
-                        $data['ecname'] = ezcreditcardType::gpgEncode( $data['ecname'] );
-
-                    if ( $data['bankcode'] > 0 )
-                        $data['bankcode'] = ezcreditcardType::gpgEncode( $data['bankcode'] );
+                    $data = ezcreditcardType::encodeData( $data );
 
                     $doc = new eZDOMDocument( 'creditcard' );
                     $root = ezcreditcardType::createDOMTreefromArray( 'creditcard', $data );
@@ -330,16 +316,7 @@ class ezcreditcardType extends eZDataType
                     $data['month']          = $http->postVariable( $base . '_ezcreditcard_month_' . $contentObjectAttribute->attribute( 'id' ) );
                     $data['year']           = $http->postVariable( $base . '_ezcreditcard_year_' . $contentObjectAttribute->attribute( 'id' ) );
 
-                    if ( $data['number'] > 0 and strlen( $data['name'] ) > 0 )
-                        $data['has_stored_card'] = 1;
-                    else
-                        $data['has_stored_card'] = 0;
-
-                    if ( $data['number'] > 0 )
-                        $data['number'] = ezcreditcardType::gpgEncode( $data['number'] );
-
-                    if ( strlen( $data['name'] ) > 0 )
-                        $data['name'] = ezcreditcardType::gpgEncode( $data['name'] );
+                    $data = ezcreditcardType::encodeData( $data );
 
                     // it's not allowed to store the cvv2 code for security reasons
                     // $data['securitycode']   = ezcreditcardType::gpgEncode( $data['securitycode'] );
@@ -356,6 +333,7 @@ class ezcreditcardType extends eZDataType
 
         return false;
     }
+    
     /*!
      \reimp
     */
@@ -392,7 +370,95 @@ class ezcreditcardType extends eZDataType
     {
          return EZ_INPUT_VALIDATOR_STATE_ACCEPTED;
     }
+    
+    function encodeData( $data )
+    {
+        if ( !isset( $data['type'] ) )
+            return $data;
+            
+        if ( $data['type'] == XROWCREDITCARD_TYPE_EUROCARD )
+        {
+            if ( isset( $data['accountnumber'] ) and $data['accountnumber'] > 0 )
+                $data['accountnumber'] = ezcreditcardType::gpgEncode( $data['accountnumber'] );
 
+            if ( isset( $data['ecname'] ) and strlen( $data['ecname'] ) > 0 )
+                $data['ecname'] = ezcreditcardType::gpgEncode( $data['ecname'] );
+
+            if ( isset( $data['bankcode'] ) and $data['bankcode'] > 0 )
+                $data['bankcode'] = ezcreditcardType::gpgEncode( $data['bankcode'] );
+        }
+        else 
+        {
+            if ( isset( $data['number'] ) and $data['number'] > 0 )
+                $data['number'] = ezcreditcardType::gpgEncode( $data['number'] );
+
+            if ( isset( $data['name'] ) and strlen( $data['name'] ) > 0 )
+                $data['name'] = ezcreditcardType::gpgEncode( $data['name'] );
+        }
+        return $data;
+    }
+    
+    function decodeData( $data )
+    {
+        if ( !isset( $data['type'] ) )
+            return $data;
+        
+        if ( $data['type'] == XROWCREDITCARD_TYPE_EUROCARD )
+        {
+            if ( isset( $data['accountnumber'] ) and strlen( $data['accountnumber'] ) > 0 )
+                $data['accountnumber'] = ezcreditcardType::gpgDecode( $data['accountnumber'] );
+
+            if ( isset( $data['ecname'] ) and strlen( $data['ecname'] ) > 0 )
+                $data['ecname'] = ezcreditcardType::gpgDecode( $data['ecname'] );
+
+            if ( isset( $data['bankcode'] ) and strlen( $data['bankcode'] ) > 0 )
+                $data['bankcode'] = ezcreditcardType::gpgDecode( $data['bankcode'] );
+        }
+        else 
+        {
+            if ( isset( $data['number'] ) and strlen( $data['number'] ) > 0 )
+                $data['number'] = ezcreditcardType::gpgDecode( $data['number'] );
+
+            if ( isset( $data['name'] ) and strlen( $data['name'] ) > 0 )
+                $data['name'] = ezcreditcardType::gpgDecode( $data['name'] );
+        }
+        return $data;
+    }
+    
+    function onPublish( &$contentObjectAttribute, &$contentObject, &$publishedNodes )
+    {
+        $hasContent = $contentObjectAttribute->hasContent();
+        if ( $hasContent )
+        {
+            $data = $contentObjectAttribute->content();
+            $data = ezcreditcardType::decodeData( $data );
+            if ( $data['type'] == XROWCREDITCARD_TYPE_EUROCARD )
+            {
+                if ( strlen( $data['ecname'] ) > 0
+                     and $data['accountnumber'] > 0
+                     and $data['bankcode'] > 0 )
+                    $data['has_stored_card'] = 1;
+                else
+                    $data['has_stored_card'] = 0;
+            }
+            else 
+            {
+                if ( $data['number'] > 0 and strlen( $data['name'] ) > 0 )
+                    $data['has_stored_card'] = 1;
+                else
+                    $data['has_stored_card'] = 0;
+            }
+            
+            $data = ezcreditcardType::encodeData( $data );
+            
+            $doc = new eZDOMDocument( 'creditcard' );
+            $root = ezcreditcardType::createDOMTreefromArray( 'creditcard', $data );
+            $doc->setRoot( $root );
+            $contentObjectAttribute->setAttribute( 'data_text', $doc->toString() );
+            $contentObjectAttribute->store();
+        }
+    }
+    
     /*!
      \reimp
     */
@@ -423,24 +489,8 @@ class ezcreditcardType extends eZDataType
         {
             $content = ezcreditcardType::createArrayfromXML( $contentObjectAttribute->attribute( 'data_text' ) );
 
-            if ( isset( $content['number'] ) )
-                $content['number'] = ezcreditcardType::gpgDecode( $content['number'] );
-
-            if ( isset( $content['name'] ) )
-                $content['name'] = ezcreditcardType::gpgDecode( $content['name'] );
-
-            if ( isset( $content['securitycode'] ) )
-                $content['securitycode'] = ezcreditcardType::gpgDecode( $content['securitycode'] );
-
-            if ( isset( $content['ecname'] ) )
-                $content['ecname'] = ezcreditcardType::gpgDecode( $content['ecname'] );
-
-            if ( isset( $content['accountnumber'] ) )
-                $content['accountnumber'] = ezcreditcardType::gpgDecode( $content['accountnumber'] );
-
-            if ( isset( $content['bankcode'] ) )
-                $content['bankcode'] = ezcreditcardType::gpgDecode( $content['bankcode'] );
-
+            $content = ezcreditcardType::decodeData( $content );    
+            
             if ( isset( $content['type'] ) )
                 $content['type_name'] = ezcreditcardType::getCardTypeName( $content['type'] );
 
