@@ -199,7 +199,7 @@ function handleSelect(type,args,obj) {
 </table>
 
 <p>
-All prices exclude Tax, Shipping and Handling. Those will be added to your order once a new order is created.  
+All prices exclude tax, shipping and handling. Those will be added to your order once a new order is created.  
 </p>
 <input class="button" type="submit" name="Remove" value="Remove" />
 <input class="button" type="submit" name="Update" value="Update" />

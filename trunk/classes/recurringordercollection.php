@@ -76,8 +76,8 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     function now()
     {
         #return 1189002190;<br />
-        return gmmktime( 0,0,0,10,17,2007 );
-        #return gmmktime( 0,0,0 );
+        #return gmmktime( 0,0,0,10,17,2007 );
+        return gmmktime( 0,0,0 );
     }
     function markRun()
     {
