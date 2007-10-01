@@ -1,4 +1,4 @@
-﻿DROP TABLE IF EXISTS `xrow_recurring_order_collection`;
+DROP TABLE IF EXISTS `xrow_recurring_order_collection`;
 CREATE TABLE  `xrow_recurring_order_collection` (
   `user_id` int(10) unsigned NOT NULL DEFAULT '0',
   `status` int(2) unsigned NOT NULL DEFAULT '0',
