@@ -3,12 +3,12 @@ $Module = array( "name" => "Recurring orders" );
 
 $ViewList = array();
 $ViewList["add"] = array( 
-    "functions" => array( 'buy' ),
+    "functions" => array( 'use' ),
     "script" => "add.php"
 );
 $ViewList["list"] = array( 
             "default_navigation_part" => 'xrowrecurringorders',
-            "functions" => array( 'buy' ),
+            "functions" => array( 'use' ),
             'single_post_actions' => array( 'Remove' => 'Remove',
                                             'Cancel' => 'Cancel',
                                             'Update' => 'Update' ),
