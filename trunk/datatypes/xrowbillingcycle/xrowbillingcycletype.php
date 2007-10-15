@@ -177,14 +177,15 @@ class xrowBillingCycleType extends eZDataType
     {
         if ( isset( $GLOBALS['xrowBillingCycleCache'][$contentObjectAttribute->ContentObjectID][$contentObjectAttribute->Version] ) )
         {
-              return $GLOBALS['xrowBillingCycleCache'][$contentObjectAttribute->ContentObjectID][$contentObjectAttribute->Version];
+            return $GLOBALS['xrowBillingCycleCache'][$contentObjectAttribute->ContentObjectID][$contentObjectAttribute->Version];
         }
         else
-        $period     = $contentObjectAttribute->attribute( "data_int" );
-        $quantity   = $contentObjectAttribute->attribute( "data_text" );
-        $content    = new xrowBillingCycle ( $period, $quantity );
-
-        return $content;
+        {
+            $period     = $contentObjectAttribute->attribute( "data_int" );
+            $quantity   = $contentObjectAttribute->attribute( "data_text" );
+            $content    = new xrowBillingCycle ( $period, $quantity );
+            return $content;
+        }
     }
 
 
