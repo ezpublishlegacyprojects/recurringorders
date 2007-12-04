@@ -1,7 +1,5 @@
 <link rel="stylesheet" type="text/css" href="/extension/recurringorders/design/standard/javascript/yui/fonts/fonts-min.css" />
 <link rel="stylesheet" type="text/css" href="/extension/recurringorders/design/standard/javascript/yui/calendar/assets/skins/sam/calendar.css" />
-<div class=" yui-skin-sam">
-
 {literal}
 <script type="text/javascript">
 YAHOO.namespace("example.calendar");
@@ -49,6 +47,10 @@ function handleSelect(type,args,obj) {
 </style>
 {/literal}
 
+<div class=" yui-skin-sam">
+
+
+
 
 {*
 {literal}
@@ -88,7 +90,7 @@ function handleSelect(type,args,obj) {
 {def $user=fetch( 'user', 'current_user' )}
 
 <div id="main-wide">
-<h1>Auto Delivery</h1>
+{*<h1>Automatic Delivery</h1>*}
 {content_view_gui content_object=$user.contentobject view="address"}
 <form name="recurringorders" method="post" action={concat( "content/edit/", $user.contentobject.id )|ezurl}>
 <div class="block">
@@ -98,21 +100,12 @@ function handleSelect(type,args,obj) {
 </form>
 <form name="recurringorders" method="post" action={concat( "recurringorders/list/", $collection.id )|ezurl}>
 
-
+<h3>Settings</h3>
 <table class="list">
 <tr>
-    <th colspan="2">Settings</th>
-    <th colspan="2">Description</th>
+    <td><p><input name="Pause" type="checkbox" value="1" {if $collection.status|ne('1')}checked{/if} /></p></td>
+    <td><p><b>Pause Automatic Delivery</b></p><p>If you are away and you wish to not receive your orders please check this box. We will also pause your Automatic Delivery, if we notice problems with your order request.</p></td>
 </tr>
-
-
-<tr>
-    <th>Pause Auto Delivery</th>
-    <td><input name="Pause" type="checkbox" value="1" {if $collection.status|ne('1')}checked{/if} /></td>
-    <td><p>If you are away and you wish to not receive your orders please check this box. We will also pause your Auto Delivery, if we notice problems with your order request.</p></td>
-</tr>
-
-
 </table>
 <p>
 <i>Important Note</i>
@@ -141,14 +134,14 @@ function handleSelect(type,args,obj) {
         {/foreach}
     </td>
     <td>{$item.created|l10n( 'shortdate' )}</td>
-    <td><input name="ItemArray[{$item.item_id}][amount]" type="input" value="{$item.amount}"/></td>
+    <td><input name="ItemArray[{$item.item_id}][amount]" type="text" value="{$item.amount}"/></td>
     <td>{$item.price_per_item|l10n( 'currency', $locale, $symbol )}</td>
     <td>{$item.price|l10n( 'currency', $locale, $symbol )}</td>
 </tr>
 <tr>
     <th>Frequency</th>
     <td>
-    <input name="ItemArray[{$item.item_id}][cycle]" type="input" value="{$item.cycle}"/>
+    <input name="ItemArray[{$item.item_id}][cycle]" type="text" value="{$item.cycle}"/>
     {def $list=fetch('recurringorders','fetch_text')}
     <select name="ItemArray[{$item.item_id}][cycle_unit]"> {* disabled for subscriptions *}
     {foreach $list as $key => $text}

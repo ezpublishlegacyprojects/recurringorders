@@ -11,6 +11,8 @@ $http =& eZHTTPTool::instance();
 if ( !$Params['CollectionID'] )
 {
     $collection = XROWRecurringOrderCollection::fetchByUser();
+    if ( !is_array( $collection ) or count( $collection ) == 0 )
+        $collection = XROWRecurringOrderCollection::createNew();
     return $Module->redirectTo( "recurringorders/list/" . $collection[0]->id );
 }
 $messages = array();
@@ -75,12 +77,12 @@ if ( $Module->isCurrentAction( 'Cancel' ) )
 }
 
 if ( $collection->checkCreditCard() !== true )
-    $messages[] = array( 'type' => 'error', 'text' => ezi18n( 'extension/recurringorders', 'We have encountered problems with your creditcard. Update your profile.' ) ) ;
+    $messages[] = array( 'type' => 'error', 'text' => ezi18n( 'extension/recurringorders', 'We have encountered problems with your credit card. Please update your profile.' ) ) ;
 $tpl->setVariable( 'messages', $messages );
 $tpl->setVariable( 'collection', $collection );
 $Result = array();
 $Result['left_menu'] = "design:parts/xrowrecurringorders/menu.tpl";
 $Result['content'] = $tpl->fetch( "design:recurringorders/list.tpl" );
 $Result['path'] = array( array( 'url' => false,
-                        'text' => 'Recurring orders' ) );
+                        'text' => 'Automatic Delivery' ) );
 ?>
