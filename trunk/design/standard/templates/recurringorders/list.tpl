@@ -1,3 +1,7 @@
+{*
+ This template works with GMT date for any date you have to append |sub(currentdate()|datetime( 'custom', '%Z' )) to get the 
+correct locale date
+*}
 <link rel="stylesheet" type="text/css" href="/extension/recurringorders/design/standard/javascript/yui/fonts/fonts-min.css" />
 <link rel="stylesheet" type="text/css" href="/extension/recurringorders/design/standard/javascript/yui/calendar/assets/skins/sam/calendar.css" />
 {literal}
@@ -133,7 +137,7 @@ function handleSelect(type,args,obj) {
         <br />
         {/foreach}
     </td>
-    <td>{$item.created|l10n( 'shortdate' )}</td>
+    <td>{$item.created|sub(currentdate()|datetime( 'custom', '%Z' ))|l10n( 'shortdate' )}</td>
     <td><input name="ItemArray[{$item.item_id}][amount]" type="text" value="{$item.amount}"/></td>
     <td>{$item.price_per_item|l10n( 'currency', $locale, $symbol )}</td>
     <td>{$item.price|l10n( 'currency', $locale, $symbol )}</td>
@@ -163,17 +167,17 @@ function handleSelect(type,args,obj) {
 	YAHOO.util.Event.onDOMReady( function() {ldelim}
 		YAHOO.example.calendar.cal{$item.item_id} = new YAHOO.widget.Calendar("cal{$item.item_id}","cal{$item.item_id}-container", 
 																	{ldelim}
-																	  pagedate:"{$item.next_date|datetime( 'custom', '%m/%Y' )}", 
-																	  selected:"{$item.next_date|l10n( 'shortdate' )}", 
+																	  pagedate:"{$item.next_date|sub(currentdate()|datetime( 'custom', '%Z' ))|datetime( 'custom', '%m/%Y' )}", 
+																	  selected:"{$item.next_date|sub(currentdate()|datetime( 'custom', '%Z' ))|l10n( 'shortdate' )}", 
 																	  mindate:"{fetch('recurringorders','now')|sum(86400)|l10n( 'shortdate' )}",
-																	  maxdate:"{fetch('recurringorders','now')|sum(86400)|sum(7776000)|l10n( 'shortdate' )}" {rdelim} );
+																	  maxdate:"{fetch('recurringorders','now')|sub(currentdate()|datetime( 'custom', '%Z' ))|sum(86400)|sum(7776000)|l10n( 'shortdate' )}" {rdelim} );
 		YAHOO.example.calendar.cal{$item.item_id}.selectEvent.subscribe(handleSelect, YAHOO.example.calendar.cal{$item.item_id}, true);
 		YAHOO.example.calendar.cal{$item.item_id}.render();
 
 	{rdelim} );
 	YAHOO.util.Event.on('cal{$item.item_id}', 'click', function() {ldelim} ShowHide( this.id ) {rdelim} ); 
 </script>
-<input type="text" name="ItemArray[{$item.item_id}][next_date]" id="cal{$item.item_id}-date" readonly value="{$item.next_date|l10n( 'shortdate' )}"/>
+<input type="text" name="ItemArray[{$item.item_id}][next_date]" id="cal{$item.item_id}-date" readonly value="{$item.next_date|sub(currentdate()|datetime( 'custom', '%Z' ))|l10n( 'shortdate' )}"/>
 <button type="button" id="cal{$item.item_id}" name="cal{$item.item_id}">Change Date</button>
 <div id="cal{$item.item_id}-container" class="container hide"></div>
     <p>This date will determine on which day the order is being processed. The shipped goods will arrive at your shipping location a short time thereafter.</p>
@@ -184,7 +188,7 @@ function handleSelect(type,args,obj) {
 {if $item.last_success}
 <tr>
     <th>Last order</th>
-    <td>{$item.last_success|l10n( 'shortdate' )}</td>
+    <td>{$item.last_success|sub(currentdate()|datetime( 'custom', '%Z' ))|l10n( 'shortdate' )}</td>
     <td></td>
 </tr>
 {/if}
