@@ -95,6 +95,10 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         $user = $this->attribute( 'user' );
         if ( !is_object( $user ) )
             return false;
+        $list = $this->fetchList();
+        if ( count( $list ) == 0 )
+            return false;
+    
         $userco = $user->attribute( 'contentobject' );
         $dm = $userco->attribute( 'data_map' );
         $data = $dm['creditcard']->attribute( 'content' );
