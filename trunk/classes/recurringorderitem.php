@@ -415,10 +415,16 @@ class XROWRecurringOrderItem extends eZPersistentObject
         {
             $item->setAttribute( $key, $value );
         }
-
-        $item->setAttribute( 'next_date', $item->nextDate() );
+        if( $isSubscription )
+        {
+            $item->setAttribute( 'next_date', $start );  
+        }
+        else
+        {
+            $item->setAttribute( 'next_date', $item->nextDate() );
+        }
+        $item->last_success = 0;
         $item->store();
-
         if ( is_array( $variations ) )
         {
             foreach ( $variations as $variation_id => $option_id )
