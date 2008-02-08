@@ -17,6 +17,15 @@ define( 'XROWCREDITCARD_TYPE_DISCOVER', 3 );
 define( 'XROWCREDITCARD_TYPE_AMERICANEXPRESS', 4 );
 define( 'XROWCREDITCARD_TYPE_EUROCARD', 5 );
 
+define( 'XROWCREDITCARD_KEY_ECNAME', 'ecname' );
+define( 'XROWCREDITCARD_KEY_ACCOUNTNUMBER', 'accountnumber' );
+define( 'XROWCREDITCARD_KEY_BANKCODE', 'bankcode' );
+define( 'XROWCREDITCARD_KEY_TYPE', 'type' );
+define( 'XROWCREDITCARD_KEY_NUMBER', 'number' );
+define( 'XROWCREDITCARD_KEY_SECURITYCODE', 'securitycode' );
+define( 'XROWCREDITCARD_KEY_MONTH', 'month' );
+define( 'XROWCREDITCARD_KEY_MONTH', 'year' );
+define( 'XROWCREDITCARD_MAINKEY_CREDITCARD', 'creditcard' );
 define( 'XROW_ERROR_NO_STORED_CARD', 101 );
 
 class ezcreditcardType extends eZDataType

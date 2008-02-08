@@ -21,7 +21,7 @@ include_once( 'extension/recurringorders/classes/recurringorderitemoption.php');
 include_once( 'lib/ezutils/classes/ezoperationhandler.php' );
 include_once( 'kernel/shop/classes/ezshopfunctions.php' );
 include_once( 'extension/recurringorders/classes/xrowsubscription.php');
-
+include_once( 'kernel/classes/ezvatmanager.php' );
 class XROWRecurringOrderCollection extends eZPersistentObject
 {
     function XROWRecurringOrderCollection( $row )
@@ -175,31 +175,6 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         return eZUser::fetch( $this->user_id );
     }
 
-    function createDOMTreefromArray( $name, $array )
-    {
-
-        $doc = new eZDOMDocument( $name );
-        $root = $doc->createElementNode( $name );
-        $keys = array_keys( $array );
-        foreach ( $keys as $key )
-        {
-
-            if ( is_array( $array[$key] ) )
-            {
-                //TODO recursive shoudl work too
-                // createDOMTreefromArray( $key, $array[$key] )
-            }
-            else
-            {
-                $node = $doc->createElementNode( $key );
-                $node->appendChild( $doc->createTextNode( $array[$key] ) );
-            }
-
-            $root->appendChild( $node );
-            unset( $node );
-        }
-        return $root;
-    }
     function createOrder( $recurringitemlist )
     {
         if ( count( $recurringitemlist ) == 0 )
@@ -217,41 +192,53 @@ class XROWRecurringOrderCollection extends eZPersistentObject
 
         foreach ( $recurringitemlist as $recurringitem )
         {
+            $handler = $recurringitem->attribute( 'handler' );
             $object = $recurringitem->attribute( 'object' );
-            $attributes = $object->contentObjectAttributes();
-
-            $priceFound = false;
-
-            foreach ( $attributes as $attribute )
+            
+            if ( !$handler )
             {
-                $dataType = $attribute->dataType();
-                if ( eZShopFunctions::isProductDatatype( $dataType->isA() ) )
+                $attributes = $object->contentObjectAttributes();
+                $priceFound = false;
+                foreach ( $attributes as $attribute )
                 {
-                    $priceObj =& $attribute->content();
-                    $price = $priceObj->attribute( 'price' );
-                    $priceFound = true;
+                    $dataType = $attribute->dataType();
+                    if ( eZShopFunctions::isProductDatatype( $dataType->isA() ) )
+                    {
+                        $priceObj =& $attribute->content();
+                        $price = $priceObj->attribute( 'price' );
+                        $priceFound = true;
+                    }
                 }
+            }
+            else
+            {
+                $price = $handler->getPrice();
             }
             $item = eZProductCollectionItem::create( $productCollectionID );
             $item->setAttribute( 'name', $object->attribute( 'name' ) );
             $item->setAttribute( "contentobject_id", $object->attribute( 'id' ) );
             $item->setAttribute( "item_count", $recurringitem->attribute( 'amount' ) );
             $item->setAttribute( "price", $price );
+            
+            
             $item->store();
-            $optionList = $recurringitem->options();
-            foreach ( $optionList as $optionData )
+            if ( !$handler )
             {
-                    if ( $optionData )
-                    {
-                        $optionData['additional_price'] = eZShopFunctions::convertAdditionalPrice( $currency, $optionData['additional_price'] );
-                        $optionItem = eZProductCollectionItemOption::create( $item->attribute( 'id' ), $optionData['id'], $optionData['name'],
+                $optionList = $recurringitem->options();
+                foreach ( $optionList as $optionData )
+                {
+                        if ( $optionData )
+                        {
+                            $optionData['additional_price'] = eZShopFunctions::convertAdditionalPrice( $currency, $optionData['additional_price'] );
+                            $optionItem = eZProductCollectionItemOption::create( $item->attribute( 'id' ), $optionData['id'], $optionData['name'],
                                                                              $optionData['value'], $optionData['additional_price'], $attributeID );
-                        $optionItem->store();
-                        $price += $optionData['additional_price'];
-                    }
+                            $optionItem->store();
+                            $price += $optionData['additional_price'];
+                        }
+                }
+                $item->setAttribute( "price", $price );
+                $item->store();
             }
-            $item->setAttribute( "price", $price );
-            $item->store();
         }
 
         $user = $this->attribute( 'user' );

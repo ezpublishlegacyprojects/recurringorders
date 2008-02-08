@@ -1,6 +1,8 @@
 <?php
 include_once( 'lib/ezutils/classes/ezcli.php' );
+include_once( 'lib/ezutils/classes/ezextension.php' );
 include_once( 'kernel/classes/ezscript.php' );
+include_once( eZExtension::baseDirectory() . '/recurringorders/classes/xrowrecurringorderscommonfunctions.php' );
 
 $cli =& eZCLI::instance();
 $script =& eZScript::instance( array( 'description' => ( "eZ publish recurring orders\n" .
@@ -11,7 +13,7 @@ $script =& eZScript::instance( array( 'description' => ( "eZ publish recurring o
 
 $script->startup();
 
-$options = $script->getOptions( "[clear-tag:][clear-id:][clear-all][list-tags][list-ids]",
+$options = $script->getOptions( "",
                                 "",
                                 array(  ) );
 $sys =& eZSys::instance();
@@ -104,7 +106,7 @@ foreach ( $list as $collection )
 
     $userArray = $accountHandler->fillAccountArray( $user );
 
-    $node = XROWRecurringOrderCollection::createDOMTreefromArray( "shop_account", $userArray );
+    $node = XROWRecurringordersCommonFunctions::createDOMTreefromArray( "shop_account", $userArray );
     $doc = new eZDOMDocument( 'account_information' );
     $doc->setRoot( $node );
     $docstring = $doc->toString();
@@ -113,6 +115,25 @@ foreach ( $list as $collection )
     $order->setAttribute( 'data_text_1', $doc->toString() );
     $order->setAttribute( 'account_identifier', $account_identifier );
     $order->setAttribute( 'email', $accountHandler->email( $order ) );
+    $order->setAttribute( 'ignore_vat', 1 );
+    $order->store();
+    eZHTTPTool::setSessionVariable( 'MyTemporaryOrderID', $order->ID );
+    
+    //set TAX
+
+    $productItems = eZPersistentObject::fetchObjectList( eZProductCollectionItem::definition(), null, array( "productcollection_id" => $order->ProductCollectionID ) );
+    $country = eZVATManager::getUserCountry( $user, false );
+    foreach ( $productItems as $item )
+    {
+        $item->setAttribute( 'vat_value', eZVATManager::getVAT( $item->attribute( 'contentobject' ), $country ) );
+        $item->store();
+    }
+    $orderItems = $order->orderItems();
+    foreach ( $orderItems as $item )
+    {
+        $item->setAttribute( 'vat_value', eZVATManager::getVAT( $item['item_object']->attribute( 'contentobject' ), $country ) );
+        $item->store();
+    }
     $order->setAttribute( 'ignore_vat', 0 );
     $order->store();
 

@@ -16,15 +16,13 @@ define( "XROW_SUBSCRIPTION_STATUS_INIT_ACTIVE", 9 );
 
 class xrowSubscription
 {
- 	function xrowSubscription( $handlerIdentifier = 'default' )
+ 	function xrowSubscription()
  	{
-        $this->handlerIdentifier = $handlerIdentifier;
-        $this->handlerArray = $this->getHandlerArray();
  	}
 
     function getHandlerArray()
     {
-        if ( count( $this->handlerArray ) == 0 )
+        if ( count( $GLOBALS['XROWSubscriptionHandlerArray'] ) == 0 )
         {
             $ini =& eZINI::instance( 'recurringorders.ini' );
             $subscriptionArray = $ini->variable( 'SubscriptionSettings', 'SubscriptionHandlerArray' );
@@ -32,12 +30,12 @@ class xrowSubscription
 
             foreach ( $subscriptionArray as $subscription )
             {
-                if ( !$this->findHandler( $subscription, $repositoryArray ) )
+                if ( !xrowSubscription::findHandler( $subscription, $repositoryArray ) )
                     eZDebug::writeError( $subscription . ': No file for inclusion found.',
                                          'xrowSubcription::getHandlerArray' );
             }
         }
-        return $this->handlerArray;
+        return $GLOBALS['XROWSubscriptionHandlerArray'];
     }
 
     function findHandler( $subscription, $repositoryArray )
@@ -49,28 +47,25 @@ class xrowSubscription
             if ( file_exists( $fileName ) )
             {
                 include_once( $fileName );
-                $this->handlerArray[$subscription] = $subscription;
+                $GLOBALS['XROWSubscriptionHandlerArray'][$subscription] = $subscription;
                 return true;
             }
         }
         return false;
     }
 
-    function getHandler( $itemID = false )
+    function getHandler( $item )
     {
-        if ( count( $this->handlerArray ) == 0 )
-            return false;
-
-        if ( in_array( $this->handlerIdentifier, $this->handlerArray ) )
+        if ( in_array( $item->subscription_handler, xrowSubscription::getHandlerArray() ) )
         {
-            $className = $this->handlerIdentifier . 'SubscriptionHandler';
-            return new $className( $itemID );
+            $className = $item->subscription_handler . 'SubscriptionHandler';
+            $newObject = new $className( );
+            $newObject->item = $item;
+            $newObject->info = $newObject->createArrayfromXML( $item->attribute( 'data_text' ) );
+            return $newObject;
         }
         else
             return false;
     }
-
-    var $handlerIdentifier;
- 	var $handlerArray = array();
 }
 ?>

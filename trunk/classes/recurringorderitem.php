@@ -104,18 +104,27 @@ class XROWRecurringOrderItem extends eZPersistentObject
                 $c = $this->attribute( 'collection' );
                 $return = $c->attribute( 'last_run' );
             }break;
+            case 'handler':
+            {
+                $content = array();
+                if ( $this->attribute( 'is_subscription' ) == 1 )
+                {
+                    $return = xrowSubscription::getHandler( $this );
 
+                }
+                else
+                    $return = false;
+
+            }break;
             case 'content':
             {
                 $content = array();
                 if ( $this->attribute( 'is_subscription' ) == 1 )
                 {
-                    $subscriptionHandler = new xrowSubscription( $this->attribute( 'subscription_handler' ) );
-
-                    $handler = $subscriptionHandler->getHandler();
+                    $handler = xrowSubscription::getHandler( $this );
 
                     if ( is_object( $handler ) )
-                        $content = $handler->createArrayfromXML( $this->attribute( 'data_text' )  );
+                        $content = $handler->createArrayfromXML( $this->attribute( 'data_text' ) );
                 }
                 return $content;
             }break;
