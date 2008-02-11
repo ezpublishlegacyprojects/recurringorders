@@ -76,8 +76,8 @@ class XROWRecurringOrderCollection extends eZPersistentObject
     function now()
     {
         #$time = 1189002190;
-        #$time = gmmktime( 0,0,0,2,5,2008 );
-        $time = gmmktime( 0,0,0 );
+        $time = gmmktime( 0,0,0,6,5,2008 );
+        #$time = gmmktime( 0,0,0 );
         return $time;
     }
     function markRun()
@@ -116,6 +116,10 @@ class XROWRecurringOrderCollection extends eZPersistentObject
             {
                 return true;
             }
+        }
+        elseif ( $data[XROWCREDITCARD_KEY_TYPE] == XROWCREDITCARD_TYPE_EUROCARD )
+        {
+            return true;
         }
         else
         {
