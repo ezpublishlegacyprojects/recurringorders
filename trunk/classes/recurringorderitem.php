@@ -1,5 +1,6 @@
 <?php
 include_once( 'extension/recurringorders/classes/recurringordercollection.php');
+include_once 'extension/recurringorders/classes/xrowrecurringorderscommonfunctions.php';
 
 class XROWRecurringOrderItem extends eZPersistentObject
 {
@@ -161,13 +162,9 @@ class XROWRecurringOrderItem extends eZPersistentObject
                 if ( strlen( $handlerIdentifier ) > 0 and
                      $this->attribute( 'is_subscription' ) == 1 )
                 {
-                    $subscriptionHandler = new xrowSubscription( $handlerIdentifier );
-                    $handler = $subscriptionHandler->getHandler();
-                    if ( is_object( $handler ) )
+                    $domnode = XROWRecurringordersCommonFunctions::createDOMTreefromArray( 'item-info', $value );
+                    if ( is_object( $domnode ) )
                     {
-                        $handler = $subscriptionHandler->getHandler();
-
-                        $domnode = $handler->createDOMTreefromArray( 'item-info', $value );
                         $doc = new eZDOMDocument();
                         $doc->setName( "ItemInfo" );
                         $doc->setRoot( $domnode );
@@ -396,7 +393,6 @@ class XROWRecurringOrderItem extends eZPersistentObject
         if ( !is_numeric( $object_id ) or $object_id <= 0 )
             return false;
 
-        $dataText = '';
         if ( $isSubscription )
         {
             $item->setAttribute( 'is_subscription', 1 );
@@ -465,16 +461,7 @@ class XROWRecurringOrderItem extends eZPersistentObject
 
         $contentobjectID = $db->escapeString( $contentobjectID );
 
-        if ( $userID == false )
-        {
-            $sql = "SELECT
-                        COUNT(*) counter
-                    FROM
-                        xrow_recurring_order_item a
-                    WHERE
-                        a.contentobject_id = '$contentobjectID'";
-        }
-        else
+        if ( $userID > 0 )
         {
             $userID = $db->escapeString( $userID );
 
@@ -487,6 +474,15 @@ class XROWRecurringOrderItem extends eZPersistentObject
                         a.user_id = '$userID' and
                         a.id = b.collection_id and
                         b.contentobject_id = '$contentobjectID'";
+        }
+        else
+        {
+            $sql = "SELECT
+                        COUNT(*) counter
+                    FROM
+                        xrow_recurring_order_item a
+                    WHERE
+                        a.contentobject_id = '$contentobjectID'";
 
         }
         $result = $db->arrayQuery( $sql );
