@@ -6,10 +6,19 @@ include_once( 'extension/recurringorders/classes/recurringordercollection.php');
 $Module =& $Params['Module'];
 include_once( 'kernel/common/template.php' );
 $tpl =& templateInit();
-if ( isset( $Params['Offset'] ) )
-    $offset = $Params['Offset'];
+
+if ( isset( $Params['UserParameters'] ) )
+{
+    $viewParameters = $Params['UserParameters'];
+}
 else
-    $offset = 0;
+{
+    $viewParameters = array();
+}
+$offset = (int)$viewParameters['offset'];
+
+$http =& eZHTTPTool::instance();
+
 $limit = 10;
 
 $http =& eZHTTPTool::instance();

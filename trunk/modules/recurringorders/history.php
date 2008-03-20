@@ -8,8 +8,17 @@ include_once( 'kernel/common/template.php' );
 $tpl =& templateInit();
 
 
-$offset = $Params['Offset'];
 $limit = 10;
+
+if ( isset( $Params['UserParameters'] ) )
+{
+    $viewParameters = $Params['UserParameters'];                  
+}
+else
+{
+    $viewParameters = array();
+}
+$offset = (int)$viewParameters['offset'];
 
 $http =& eZHTTPTool::instance();
 
@@ -19,7 +28,6 @@ $tpl->setVariable( "history_list", XROWRecurringOrderHistory::historyList( $offs
 $tpl->setVariable( "history_list_count", XROWRecurringOrderHistory::historyCount() );
 $tpl->setVariable( "limit", $limit );
 
-$viewParameters = array( 'offset' => $offset );
 $tpl->setVariable( "module", $Module );
 $tpl->setVariable( 'view_parameters', $viewParameters );
 
