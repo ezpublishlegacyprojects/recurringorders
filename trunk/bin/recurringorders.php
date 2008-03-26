@@ -60,7 +60,11 @@ foreach ( $list as $collection )
         $cli->output( "Collection #" . $collection->id . ' has to wait for the next try');
         continue;
     }
-    
+    if ( !$collection->isDue() )    
+    {
+        $cli->output( "Collection #" . $collection->id . " has no items that are due." );
+        continue;
+    }
     $cccheck = $collection->checkCreditCard();
     if ( $cccheck !== true )
     {
@@ -71,11 +75,7 @@ foreach ( $list as $collection )
         $cli->output( "Collection #" . $collection->id . ' credit card error' );
         continue;
     }
-    if ( !$collection->isDue() )    
-    {
-        $cli->output( "Collection #" . $collection->id . " has no items that are due." );
-        continue;
-    }
+
     include_once( 'kernel/classes/ezshopaccounthandler.php' );
 
     $accountHandler =& eZShopAccountHandler::instance();
