@@ -30,7 +30,7 @@ class XROWRecurringOrderHistory extends eZPersistentObject
                                                                    'default' => time(),
                                                                    'required' => true ),
                                          "data_text" => array( 'name' => "data_text",
-                                                                   'datatype' => 'integer',
+                                                                   'datatype' => 'string',
                                                                    'default' => null,
                                                                    'required' => true )
                                                                    ),
