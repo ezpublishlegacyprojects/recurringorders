@@ -18,8 +18,15 @@ else
 {
     $viewParameters = array();
 }
-$offset = (int)$viewParameters['offset'];
-
+if ( array_key_exists( 'offset', $viewParameters ) )
+{
+    $offset = (int)$viewParameters['offset'];
+}
+else
+{
+    $offset = 0;
+}
+    
 $http =& eZHTTPTool::instance();
 
 

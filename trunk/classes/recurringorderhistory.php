@@ -91,7 +91,7 @@ class XROWRecurringOrderHistory extends eZPersistentObject
         $db_params = array();
         $db_params["offset"] =(int) $offset;
         $db_params["limit"] =(int) $limit;
-        return XROWRecurringOrderHistory::fetchObjectList( XROWRecurringOrderHistory::definition(), null, null, array( 'date' => true ), $db_params );
+        return XROWRecurringOrderHistory::fetchObjectList( XROWRecurringOrderHistory::definition(), null, null, array( 'date' => true, 'id' => true ), $db_params );
          
     }
 }
