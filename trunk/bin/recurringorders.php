@@ -144,22 +144,25 @@ foreach ( $list as $collection )
         {
             if (  isset( $operationResult['redirect_url'] ) )
             {
-                $collection->addHistory( XROWRECURRINGORDER_STATUSTYPE_FAILURE, "Order has been processed with a strange result.", $order->ID);
-                continue;
+                $collection->addHistory( XROWRECURRINGORDER_STATUSTYPE_FAILURE, "Order has been processed with a strange result.", $order->ID );
+                continue 2;
             }
             else if ( isset( $operationResult['result'] ) )
             {
-                $collection->addHistory( XROWRECURRINGORDER_STATUSTYPE_FAILURE, "Order has been processed with a strange result.", $order->ID);
-                continue;
+                $collection->addHistory( XROWRECURRINGORDER_STATUSTYPE_FAILURE, "Order has been processed with a strange result.", $order->ID );
+                continue 2;
             }
         }break;
         case EZ_MODULE_OPERATION_CANCELED:
         {
-            $collection->addHistory( XROWRECURRINGORDER_STATUSTYPE_FAILURE, "Order has been CANCELED.", $order->ID);
-            continue;
-        }
-    }
+            $collection->addHistory( XROWRECURRINGORDER_STATUSTYPE_FAILURE, "Order has been CANCELED.", $order->ID );
+            continue 2;
+        }break;
+        default:
+        {
 
+        }break;
+    }
     $order = eZOrder::fetch( $order->ID );
     $cli->output( "Order #" . $order->OrderNr . " created." );
     foreach ( $items as $item )
@@ -168,7 +171,7 @@ foreach ( $list as $collection )
         $item->store();
         $cli->output( "  Item #" . $item->item_id . " next order is on " . strftime( "%d.%m.%Y", $item->attribute( 'next_date' ) ) );
     }
-    $collection->addHistory( XROWRECURRINGORDER_STATUSTYPE_SUCCESS, "Order has been completed.", $order->ID );
+    $collection->addHistory( XROWRECURRINGORDER_STATUSTYPE_SUCCESS, "Order has been completed.", $order->ID ); 
 }
 $cli->output( "Recurring Orders processed" );
 
