@@ -6,7 +6,7 @@ class XROWRecurringOrderHistory extends eZPersistentObject
     {
         parent::eZPersistentObject( $row );
     }
-    function definition()
+    static function definition()
     {
         return array( "fields" => array( 
                                          "id" => array( 'name' => "id",

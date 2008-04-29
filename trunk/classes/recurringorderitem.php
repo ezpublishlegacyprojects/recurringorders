@@ -8,7 +8,7 @@ class XROWRecurringOrderItem extends eZPersistentObject
     {
         parent::eZPersistentObject( $row );
     }
-    function definition()
+    static function definition()
     {
         return array( "fields" => array(
                                          "item_id" => array( 'name' => "item_id",

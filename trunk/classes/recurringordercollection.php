@@ -29,7 +29,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         parent::eZPersistentObject( $row );
     }
 
-    function definition()
+    static function definition()
     {
         return array( "fields" => array(
                                          "user_id" => array( 'name' => "user_id",
