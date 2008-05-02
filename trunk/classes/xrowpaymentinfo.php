@@ -54,7 +54,7 @@ class xrowPaymentInfo
      returns the object of the $gateway Class
      This can be called like xrowPaymentInfo::getInfoClassObj( $gateway )
     */
-    function getInfoClassObj( $gateway )
+    static function getInfoClassObj( $gateway )
     {
         if ( !isset( $GLOBALS['xrowPaymentInfoClasses'] ) )
             xrowPaymentInfo::getGateways();

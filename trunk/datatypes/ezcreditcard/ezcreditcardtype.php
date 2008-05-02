@@ -1,13 +1,5 @@
 <?php
 
-include_once( 'kernel/classes/ezdatatype.php' );
-include_once( 'lib/ezlocale/classes/ezdatetime.php' );
-include_once( 'lib/ezutils/classes/ezintegervalidator.php' );
-include_once( 'kernel/common/i18n.php' );
-include_once( 'lib/ezxml/classes/ezxml.php' );
-include_once( eZExtension::baseDirectory() . '/recurringorders/classes/xrowpaymentinfo.php' );
-include_once( eZExtension::baseDirectory() . '/recurringorders/classes/recurringordercollection.php' );
-
 define( 'EZ_DATATYPESTRING_CREDITCARD', 'ezcreditcard' );
 define( 'EZ_DATATYPE_CREDITCARD_GATEWAY_FIELD', 'data_text5' );
 
@@ -60,7 +52,6 @@ class ezcreditcardType extends eZDataType
     */
     function validateCard( $data, &$contentObjectAttribute, &$classAttribute )
     {
-        $error = false;
         $classContent = $this->classAttributeContent( $classAttribute );
         $gatewayArray = $classContent['gateway'];
 
@@ -72,20 +63,20 @@ class ezcreditcardType extends eZDataType
             if ( is_object( $payObj ) )
             {
                 if ( $payObj->validateCardData( $contentObjectAttribute, $classAttribute, $data ) )
-                    return EZ_INPUT_VALIDATOR_STATE_ACCEPTED;
+                    return eZInputValidator::STATE_ACCEPTED;
                 else
-                    return EZ_INPUT_VALIDATOR_STATE_INVALID;
+                    return eZInputValidator::STATE_INVALID;
             }
             else
             {
                 eZDebug::writeError( 'PaymentInfo Object not found: ' . $gateway . 'Info', 'eZCreditcardType::validateCard' );
-                return EZ_INPUT_VALIDATOR_STATE_INVALID;
+                return eZInputValidator::STATE_INVALID;
             }
         }
         else
         {
             eZDebug::writeError( 'Gateway not found: ' . $data['type'], 'eZCreditcardType::validateCard' );
-            return EZ_INPUT_VALIDATOR_STATE_INVALID;
+            return eZInputValidator::STATE_INVALID;
         }
     }
 
@@ -123,7 +114,7 @@ class ezcreditcardType extends eZDataType
                         {
                             $contentObjectAttribute->setValidationError( ezi18n( 'kernel/classes/datatypes',
                                                                                  'Input is required, if you have active subcriptions or recurring orders.' ) );
-                            return EZ_INPUT_VALIDATOR_STATE_INVALID;
+                            return eZInputValidator::STATE_INVALID;
                         }
 
                         if ( !$classAttribute->attribute( 'is_information_collector' ) and
@@ -135,13 +126,13 @@ class ezcreditcardType extends eZDataType
                             {
                                 $contentObjectAttribute->setValidationError( ezi18n( 'kernel/classes/datatypes',
                                                                                  'Input required.' ) );
-                                return EZ_INPUT_VALIDATOR_STATE_INVALID;
+                                return eZInputValidator::STATE_INVALID;
                             }
                             else
-                                return EZ_INPUT_VALIDATOR_STATE_ACCEPTED;
+                                return eZInputValidator::STATE_ACCEPTED;
                         }
                         else
-                            return EZ_INPUT_VALIDATOR_STATE_ACCEPTED;
+                            return eZInputValidator::STATE_ACCEPTED;
                     }
                     else
                     {
@@ -331,7 +322,7 @@ class ezcreditcardType extends eZDataType
                     // $data['securitycode']   = ezcreditcardType::gpgEncode( $data['securitycode'] );
 
                     $doc = new eZDOMDocument( 'creditcard' );
-                    $root = ezcreditcardType::createDOMTreefromArray( 'creditcard', $data );
+                    $root = XROWRecurringordersCommonFunctions::createDOMTreefromArray( 'creditcard', $data );
                     $doc->setRoot( $root );
                     $contentObjectAttribute->setAttribute( 'data_text', $doc->toString() );
 
@@ -461,7 +452,7 @@ class ezcreditcardType extends eZDataType
             $data = ezcreditcardType::encodeData( $data );
             
             $doc = new eZDOMDocument( 'creditcard' );
-            $root = ezcreditcardType::createDOMTreefromArray( 'creditcard', $data );
+            $root = XROWRecurringordersCommonFunctions::createDOMTreefromArray( 'creditcard', $data );
             $doc->setRoot( $root );
             $contentObjectAttribute->setAttribute( 'data_text', $doc->toString() );
             $contentObjectAttribute->store();
@@ -496,7 +487,7 @@ class ezcreditcardType extends eZDataType
         }
         else
         {
-            $content = ezcreditcardType::createArrayfromXML( $contentObjectAttribute->attribute( 'data_text' ) );
+            $content = XROWRecurringordersCommonFunctions::createArrayfromXML( $contentObjectAttribute->attribute( 'data_text' ) );
 
             $content = ezcreditcardType::decodeData( $content );    
             
@@ -557,7 +548,7 @@ class ezcreditcardType extends eZDataType
         //eZDebug::writeDebug ( $cardGatewayArray, 'cardGatewayArray' );
         $content['card_gateway_array'] = $cardGatewayArray;
 
-        $content['gateway'] = ezcreditcardType::createArrayfromXML( $classAttribute->attribute( EZ_DATATYPE_CREDITCARD_GATEWAY_FIELD ) );
+        $content['gateway'] = XROWRecurringordersCommonFunctions::createArrayfromXML( $classAttribute->attribute( EZ_DATATYPE_CREDITCARD_GATEWAY_FIELD ) );
 
         $GLOBALS['xrowCCClassInfo'][$classAttribute->ID][$classAttribute->Version] = $content;
 
@@ -615,55 +606,6 @@ class ezcreditcardType extends eZDataType
         return $diffObject;
     }
 
-    function createDOMTreefromArray( $name, $array )
-    {
-        $doc = new eZDOMDocument( $name );
-        $root = $doc->createElementNode( $name );
-        $keys = array_keys( $array );
-        foreach ( $keys as $key )
-        {
-            if ( is_array( $array[$key] ) )
-            {
-                //TODO recursive should work too
-                // createDOMTreefromArray( $key, $array[$key] )
-            }
-            else
-            {
-                $node = $doc->createElementNode( $key );
-                $node->appendChild( $doc->createTextNode( $array[$key] ) );
-            }
-
-            $root->appendChild( $node );
-            unset( $node );
-        }
-        return $root;
-    }
-
-    function createArrayfromXML( $xmlDoc )
-    {
-        $result = array();
-        $xml = new eZXML();
-        $dom = $xml->domTree( $xmlDoc );
-        if ( is_object( $dom ) )
-        {
-            $node = $dom->get_root();
-            $children = $node->children();
-            foreach ( $children as $child )
-            {
-                $contentnode = $child->firstChild();
-                if ( $contentnode->type === EZ_XML_NODE_TEXT )
-                {
-                    $result[$child->name()] = $contentnode->textContent();
-                }
-                else
-                {
-                    // do something recurisve here, there is currently no need
-                }
-            }
-        }
-        return $result;
-    }
-
     function gpgEncode( $value )
     {
         if ( include_once( eZExtension::baseDirectory() . '/ezgpg/autoloads/ezgpg_operators.php' ) )
@@ -708,12 +650,18 @@ class ezcreditcardType extends eZDataType
             );
 
         if ( $type == -1 )
+        {
             return $GLOBALS['xrowCreditCardArray'];
+        }
         else if ( isset( $GLOBALS['xrowCreditCardArray'][$type] ) )
+        {
             return $GLOBALS['xrowCreditCardArray'][$type];
+        }
         else
+        {
             eZDebug::writeError( 'Card type not found.', 'ezcreditcardtype' );
-
+            return false;
+        }
     }
 
     // returns true, if an user has a stored card

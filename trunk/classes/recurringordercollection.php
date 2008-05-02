@@ -13,15 +13,6 @@ define( 'XROWRECURRINGORDER_STATUSTYPE_SUCCESS', 1 );
 define( 'XROWRECURRINGORDER_STATUSTYPE_CREDITCARD_EXPIRES', 2 );
 define( 'XROWRECURRINGORDER_STATUSTYPE_FAILURE', 2 );
 
-include_once( 'kernel/classes/ezpersistentobject.php' );
-include_once( 'lib/ezlocale/classes/ezdatetime.php');
-include_once( 'extension/recurringorders/classes/recurringorderhistory.php');
-include_once( 'extension/recurringorders/classes/recurringorderitem.php');
-include_once( 'extension/recurringorders/classes/recurringorderitemoption.php');
-include_once( 'lib/ezutils/classes/ezoperationhandler.php' );
-include_once( 'kernel/shop/classes/ezshopfunctions.php' );
-include_once( 'extension/recurringorders/classes/xrowsubscription.php');
-include_once( 'kernel/classes/ezvatmanager.php' );
 class XROWRecurringOrderCollection extends eZPersistentObject
 {
     function XROWRecurringOrderCollection( $row )
@@ -73,7 +64,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
      *
      * @return int
      */
-    function now()
+    static function now()
     {
         #$time = 1189002190;
         #$time = gmmktime( 0,0,0,9,5,2008 );
@@ -271,7 +262,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
         return $order;
     }
 
-    function fetchByUser( $user_id = null )
+    static function fetchByUser( $user_id = null )
     {
         if ( $user_id === null )
                $user_id = eZUser::currentUserID();
@@ -283,7 +274,7 @@ class XROWRecurringOrderCollection extends eZPersistentObject
      *
      * @return array array of XROWRecurringOrderCollection
      */
-    function fetchAll()
+    static function fetchAll()
     {
         return eZPersistentObject::fetchObjectList( XROWRecurringOrderCollection::definition(),
                 null, null, true );

@@ -5,9 +5,9 @@ include_once( 'extension/recurringorders/classes/recurringordercollection.php');
 
 $Module =& $Params['Module'];
 include_once( 'kernel/common/template.php' );
-$tpl =& templateInit();
+$tpl = templateInit();
 $user = eZUser::currentUser();
-$http =& eZHTTPTool::instance();
+$http = eZHTTPTool::instance();
 if ( !$Params['CollectionID'] )
 {
     $collection = XROWRecurringOrderCollection::fetchByUser();

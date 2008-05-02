@@ -4,12 +4,12 @@
  * of its location
  * @tutorial bla.txt
  */
-include_once( 'lib/ezxml/classes/ezxml.php' );
+
 
 class XROWRecurringordersCommonFunctions
 {
     
-    function addLeadingZero( $value )
+    static function addLeadingZero( $value )
     {
         return sprintf("%02d", $value);
     }
@@ -17,7 +17,7 @@ class XROWRecurringordersCommonFunctions
      \static
      This can be called like XROWRecurringordersCommonFunctions::createDOMTreefromArray( $name, $array )
     */
-    function createDOMTreefromArray( $name, $array, $root = false )
+    static function createDOMTreefromArray( $name, $array, $root = false )
     {
         $doc = new eZDOMDocument( $name );
         if ( !$root )
@@ -46,7 +46,7 @@ class XROWRecurringordersCommonFunctions
      \static
      This can be called like XROWRecurringordersCommonFunctions::createArrayfromXML( $xmlDoc )
     */
-    function createArrayfromXML( $xmlDoc )
+    static function createArrayfromXML( $xmlDoc )
     {
         $result = array();
         $xml = new eZXML();
@@ -74,7 +74,7 @@ class XROWRecurringordersCommonFunctions
      \static
      This can be called like XROWRecurringordersCommonFunctions::createArrayfromDOMNODE( $node )
     */
-    function createArrayfromDOMNODE( $node )
+    static function createArrayfromDOMNODE( $node )
     {
         $result = array();
         if ( is_object( $node ) )

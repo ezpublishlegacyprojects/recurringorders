@@ -1,6 +1,4 @@
 <?php
-include_once( 'extension/recurringorders/classes/recurringordercollection.php');
-include_once 'extension/recurringorders/classes/xrowrecurringorderscommonfunctions.php';
 
 class XROWRecurringOrderItem extends eZPersistentObject
 {
