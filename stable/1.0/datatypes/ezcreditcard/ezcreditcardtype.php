@@ -704,7 +704,7 @@ class ezcreditcardType extends eZDataType
                 XROWCREDITCARD_TYPE_VISA => ezi18n( 'kernel/classes/datatypes', 'Visa' ),
                 XROWCREDITCARD_TYPE_DISCOVER => ezi18n( 'kernel/classes/datatypes', 'Discover' ),
                 XROWCREDITCARD_TYPE_AMERICANEXPRESS => ezi18n( 'kernel/classes/datatypes', 'American Express' ),
-                XROWCREDITCARD_TYPE_EUROCARD => ezi18n( 'kernel/classes/datatypes', 'Eurocard' )
+                XROWCREDITCARD_TYPE_EUROCARD => ezi18n( 'kernel/classes/datatypes', 'Debit card' )
             );
 
         if ( $type == -1 )
