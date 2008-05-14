@@ -35,7 +35,7 @@ class ezcreditcardType extends eZDataType
     */
     function ezcreditcardType()
     {
-        $this->eZDataType( EZ_DATATYPESTRING_CREDITCARD, ezi18n( 'kernel/classes/datatypes', 'Creditcard', 'Datatype name' ),
+        $this->eZDataType( EZ_DATATYPESTRING_CREDITCARD, ezi18n( 'kernel/classes/datatypes', 'Credit card', 'Datatype name' ),
                            array( 'serialize_supported' => true,
                                   'object_serialize_map' => array( 'data_text' => 'text' ) ) );
     }
