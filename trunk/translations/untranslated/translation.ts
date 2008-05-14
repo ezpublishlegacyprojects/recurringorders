@@ -56,7 +56,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>The Message list is empty.</source>
+        <source>The message list is empty.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -101,19 +101,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Remove creditcard</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Card type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Name on card</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Creditcard number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -138,6 +130,14 @@
     </message>
     <message>
         <source>No card stored.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove credit card</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Credit card number</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -206,15 +206,6 @@
 <context>
     <name>kernel/classes/datatypes</name>
     <message>
-        <source>Creditcard</source>
-        <comment>Datatype name</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Input is required, if you have active subcriptions or recurring orders.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Input required.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -241,6 +232,15 @@
     <message>
         <source>Billing cycle</source>
         <comment>Datatype name</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Credit card</source>
+        <comment>Datatype name</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Input is required, if you have active subscriptions or recurring orders.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

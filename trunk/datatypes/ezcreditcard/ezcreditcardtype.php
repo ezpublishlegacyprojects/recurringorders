@@ -113,7 +113,7 @@ class ezcreditcardType extends eZDataType
                         if ( $this->hasOrderCollection( $contentObjectAttribute ) )
                         {
                             $contentObjectAttribute->setValidationError( ezi18n( 'kernel/classes/datatypes',
-                                                                                 'Input is required, if you have active subcriptions or recurring orders.' ) );
+                                                                                 'Input is required, if you have active subscriptions or recurring orders.' ) );
                             return eZInputValidator::STATE_INVALID;
                         }
 
@@ -186,7 +186,7 @@ class ezcreditcardType extends eZDataType
                         if ( $this->hasOrderCollection( $contentObjectAttribute ) )
                         {
                             $contentObjectAttribute->setValidationError( ezi18n( 'kernel/classes/datatypes',
-                                                                                 'Input is required, if you have active subcriptions or recurring orders.' ) );
+                                                                                 'Input is required, if you have active subscriptions or recurring orders.' ) );
 
                             return EZ_INPUT_VALIDATOR_STATE_INVALID;
                         }
