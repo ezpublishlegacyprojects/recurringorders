@@ -42,7 +42,7 @@
             <td>&nbsp;{$attribute.content.bankcode|wash}</td>
         </tr>
         </table>
-        <input class="button" type="submit" name="CustomActionButton[{$attribute.id}_delete_creditcard]" value="{'Remove eurocard'|i18n( 'design/standard/content/datatype' )}" />
+        <input class="button" type="submit" name="CustomActionButton[{$attribute.id}_delete_creditcard]" value="{'Remove debit card'|i18n( 'design/standard/content/datatype' )}" />
     {else}
         <p>
            <strong>{$attribute.content.name|wash}</strong><br />
