@@ -51,7 +51,7 @@
            {"expires"|i18n('design/standard/content/datatype')} {$attribute.content.month}/{$attribute.content.year}
         </p>
         </div>
-        <input class="button" type="submit" name="CustomActionButton[{$attribute.id}_delete_creditcard]" value="{'Remove creditcard'|i18n( 'design/standard/content/datatype' )}" />
+        <input class="button" type="submit" name="CustomActionButton[{$attribute.id}_delete_creditcard]" value="{'Remove credit card'|i18n( 'design/standard/content/datatype' )}" />
 
     {/if}
 {else}
@@ -75,7 +75,7 @@
     <div id="ro-creditcardtype-{$attribute.id}"{if $type|eq(5)} style="display: none;"{/if}>
         <label>{'Name on card'|i18n( 'design/standard/content/datatype' )}:</label>
         <input id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" type="text" size="70" name="{$attribute_base}_ezcreditcard_name_{$attribute.id}" value="{$name|wash( xhtml )}" />
-        <label>{'Creditcard number'|i18n( 'design/standard/content/datatype' )}</label>
+        <label>{'Credit card number'|i18n( 'design/standard/content/datatype' )}</label>
         <input id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" type="text" size="70" name="{$attribute_base}_ezcreditcard_number_{$attribute.id}" value="{$number|wash( xhtml )}" />
         <label>{'Security Code'|i18n( 'design/standard/content/datatype' )}</label>
         <input maxlength="4" id="ezcoa-{if ne( $attribute_base, 'ContentObjectAttribute' )}{$attribute_base}-{/if}{$attribute.contentclassattribute_id}_{$attribute.contentclass_attribute_identifier}" class="{eq( $html_class, 'half' )|choose( 'box', 'halfbox' )} ezcc-{$attribute.object.content_class.identifier} ezcca-{$attribute.object.content_class.identifier}_{$attribute.contentclass_attribute_identifier}" type="text" size="70" name="{$attribute_base}_ezcreditcard_securitycode_{$attribute.id}" value="{$securitycode|wash( xhtml )}" /> <a id="show_cvv_tip">{'Help'|i18n( 'design/standard/content/datatype' )}</a>

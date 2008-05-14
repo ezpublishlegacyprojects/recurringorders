@@ -56,7 +56,7 @@
 
 {else}
 <div class="block">
-<p>{'The Message list is empty.'|i18n( 'design/admin/shop/customerlist' )}</p>
+<p>{'The message list is empty.'|i18n( 'design/admin/shop/customerlist' )}</p>
 </div>
 {/if}
 
