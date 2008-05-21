@@ -1,16 +1,4 @@
 <?php
-//
-// Definition of xrowBillingCycle class
-
-/*!
-  \class xrowBillingCycle xrowbillingcycle.php
-  \ingroup eZDatatype
-  \brief A class which handles billing cycles for the datatype
-
-
-*/
-
-include_once( eZExtension::baseDirectory() . '/recurringorders/classes/recurringordercollection.php' );
 
 class xrowBillingCycle
 {
@@ -48,7 +36,7 @@ class xrowBillingCycle
         return in_array( $name, $this->attributes() );
     }
 
-   function &attribute( $name )
+   function attribute( $name )
     {
         switch ( $name )
         {

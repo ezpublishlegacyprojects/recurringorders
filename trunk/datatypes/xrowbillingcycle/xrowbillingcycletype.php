@@ -1,27 +1,11 @@
 <?php
-//
-// Definition of xrowBillingCycleType class
-
-/*!
-  \class xrowBillingCycleType xrowbillingcycletype.php
-  \ingroup eZDatatype
-  \brief A content datatype which handles billing cycles
-
-  It uses the spare field data_int and data_text in a content object attribute for storing
-  the attribute data.
-*/
-
-include_once( 'kernel/classes/ezdatatype.php' );
-include_once( 'extension/recurringorders/classes/recurringordercollection.php' );
-include_once( 'extension/recurringorders/datatypes/xrowbillingcycle/xrowbillingcycle.php' );
-
-define( "EZ_DATATYPESTRING_XROWBILLINGCYCLE", "xrowbillingcycle" );
 
 class xrowBillingCycleType extends eZDataType
 {
+    const DATA_TYPE_STRING = "xrowbillingcycle";
     function xrowBillingCycleType()
     {
-        $this->eZDataType( EZ_DATATYPESTRING_XROWBILLINGCYCLE, ezi18n( 'kernel/classes/datatypes', "Billing cycle", 'Datatype name' ),
+        $this->eZDataType( xrowBillingCycleType::DATA_TYPE_STRING, ezi18n( 'kernel/classes/datatypes', "Billing cycle", 'Datatype name' ),
                            array( 'serialize_supported' => true,
                                   'object_serialize_map' => array( 'data_int' => 'period', 'data_text' => 'quantity' ) ) );
     }
@@ -30,7 +14,7 @@ class xrowBillingCycleType extends eZDataType
      Validates the input and returns true if the input was
      valid for this datatype.
     */
-    function validateObjectAttributeHTTPInput( &$http, $base, &$contentObjectAttribute )
+    function validateObjectAttributeHTTPInput( $http, $base, $contentObjectAttribute )
     {
         if ( $http->hasPostVariable( $base . "_data_billingcycle_period_" . $contentObjectAttribute->attribute( "id" ) )
              AND $http->hasPostVariable( $base . "_data_billingcycle_quantity_" . $contentObjectAttribute->attribute( "id" ) ))
@@ -45,14 +29,7 @@ class xrowBillingCycleType extends eZDataType
             return EZ_INPUT_VALIDATOR_STATE_ACCEPTED;
     }
 
-    function fixupObjectAttributeHTTPInput( &$http, $base, &$contentObjectAttribute )
-    {
-    }
-
-    /*!
-     Sets the default value.
-    */
-    function initializeObjectAttribute( &$contentObjectAttribute, $currentVersion, &$originalContentObjectAttribute )
+    function initializeObjectAttribute( $contentObjectAttribute, $currentVersion, $originalContentObjectAttribute )
     {
         if ( $currentVersion != false )
         {
@@ -72,7 +49,7 @@ class xrowBillingCycleType extends eZDataType
     /*!
      Fetches the http post var integer input and stores it in the data instance.
     */
-    function fetchObjectAttributeHTTPInput( &$http, $base, &$contentObjectAttribute )
+    function fetchObjectAttributeHTTPInput( $http, $base, $contentObjectAttribute )
     {
         if ( $http->hasPostVariable( $base . "_data_billingcycle_period_" . $contentObjectAttribute->attribute( "id" ) )
              AND $http->hasPostVariable( $base . "_data_billingcycle_quantity_" . $contentObjectAttribute->attribute( "id" ) ) )
@@ -93,7 +70,7 @@ class xrowBillingCycleType extends eZDataType
     /*!
      \reimp
     */
-    function validateCollectionAttributeHTTPInput( &$http, $base, &$contentObjectAttribute )
+    function validateCollectionAttributeHTTPInput( $http, $base, $contentObjectAttribute )
     {
         if ( $http->hasPostVariable( $base . "_data_billingcycle_period_" . $contentObjectAttribute->attribute( "id" ) )
              AND $http->hasPostVariable( $base . "_data_billingcycle_quantity_" . $contentObjectAttribute->attribute( "id" ) ))
@@ -104,7 +81,7 @@ class xrowBillingCycleType extends eZDataType
             $quantity = $http->postVariable( $base . "_data_billingcycle_quantity_" . $contentObjectAttribute->attribute( "id" ) );
             $quantity = str_replace(" ", "", $quantity );
 
-            $classAttribute =& $contentObjectAttribute->contentClassAttribute();
+            $classAttribute = $contentObjectAttribute->contentClassAttribute();
 
             if ( $period == "" or $quantity == "" )
             {
@@ -140,7 +117,7 @@ class xrowBillingCycleType extends eZDataType
     /*!
      Fetches the http post variables for collected information
     */
-    function fetchCollectionAttributeHTTPInput( &$collection, &$collectionAttribute, &$http, $base, &$contentObjectAttribute )
+    function fetchCollectionAttributeHTTPInput( $collection, $collectionAttribute, $http, $base, $contentObjectAttribute )
     {
         if ( $http->hasPostVariable( $base . "_data_billingcycle_period_" . $contentObjectAttribute->attribute( "id" ) )
              AND $http->hasPostVariable( $base . "_data_billingcycle_quantity_" . $contentObjectAttribute->attribute( "id" ) ) )
@@ -160,20 +137,20 @@ class xrowBillingCycleType extends eZDataType
     /*!
      Clears cache
     */
-    function storeObjectAttribute( &$contentObjectAttribute )
+    function storeObjectAttribute( $contentObjectAttribute )
     {
         if ( isset( $GLOBALS['xrowBillingCycleCache'][$contentObjectAttribute->ContentObjectID][$contentObjectAttribute->Version] ) )
             unset( $GLOBALS['xrowBillingCycleCache'][$contentObjectAttribute->ContentObjectID][$contentObjectAttribute->Version] );
     }
 
-    function storeClassAttribute( &$attribute, $version )
+    function storeClassAttribute( $attribute, $version )
     {
     }
 
     /*!
      Returns the content.
     */
-    function &objectAttributeContent( &$contentObjectAttribute )
+    function &objectAttributeContent( $contentObjectAttribute )
     {
         if ( isset( $GLOBALS['xrowBillingCycleCache'][$contentObjectAttribute->ContentObjectID][$contentObjectAttribute->Version] ) )
         {
@@ -203,7 +180,7 @@ class xrowBillingCycleType extends eZDataType
     /*!
      Returns the integer value.
     */
-    function title( &$contentObjectAttribute )
+    function title( $contentObjectAttribute )
     {
         $period = $contentObjectAttribute->attribute( "data_int" );
         $quantity = $contentObjectAttribute->attribute( "data_text" );
@@ -212,14 +189,11 @@ class xrowBillingCycleType extends eZDataType
         return $quantity . ' ' . $$textField;
     }
 
-    function hasObjectAttributeContent( &$contentObjectAttribute )
+    function hasObjectAttributeContent( $contentObjectAttribute )
     {
         return true;
     }
 
-    /*!
-     \reimp
-    */
     function isInformationCollector()
     {
         return true;
@@ -233,40 +207,17 @@ class xrowBillingCycleType extends eZDataType
         return true;
     }
 
-    /*!
-     \reimp
-    */
-    function sortKey( &$contentObjectAttribute )
+    function sortKey( $contentObjectAttribute )
     {
         return $contentObjectAttribute->attribute( 'data_int' );
     }
 
-    /*!
-     \reimp
-    */
     function sortKeyType()
     {
         return 'int';
     }
-
-    /*!
-     \reimp
-    */
-    function serializeContentClassAttribute( &$classAttribute, &$attributeNode, &$attributeParametersNode )
-    {
-
-    }
-
-    /*!
-     \reimp
-    */
-    function unserializeContentClassAttribute( &$classAttribute, &$attributeNode, &$attributeParametersNode )
-    {
-
-    }
-
 }
 
-eZDataType::register( EZ_DATATYPESTRING_XROWBILLINGCYCLE, "xrowbillingcycletype" );
+eZDataType::register( xrowBillingCycleType::DATA_TYPE_STRING, "xrowbillingcycletype" );
 
 ?>

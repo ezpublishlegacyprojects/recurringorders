@@ -8,8 +8,6 @@
     Allows usage of multiple payment gateways for ezcreditcard datatype.
 */
 
-include_once( eZExtension::baseDirectory() . '/recurringorders/datatypes/ezcreditcard/ezcreditcardtype.php' );
-
 class xrowPaymentInfo
 {
     function xrowPaymentInfo()
@@ -22,14 +20,14 @@ class xrowPaymentInfo
      includes the payment info classes
      This can be called like xrowPaymentInfo::getGateways()
     */
-    function getGateways()
+    static function getGateways()
     {
         if ( isset( $GLOBALS['xrowPaymentInfoArray'] ) )
             return $GLOBALS['xrowPaymentInfoArray'];
 
         include_once( 'kernel/classes/workflowtypes/event/ezpaymentgateway/ezpaymentgatewaytype.php' );
-        $gw =& new eZPaymentGatewayType();
-        $gatewayArray =& $gw->getGateways( array( -1 ) );
+        $gw = new eZPaymentGatewayType();
+        $gatewayArray = $gw->getGateways( array( -1 ) );
         //eZDebug::writeDebug ( $gatewayArray, 'gateways' );
 
         $result = array();

@@ -94,7 +94,7 @@ class XROWRecurringOrderItem extends eZPersistentObject
     	return XROWRecurringOrderCollection::fetch( $this->collection_id );
     }
 
-    function &attribute( $name )
+    function attribute( $attr, $noFunction = false )
     {
         switch ( $name )
         {
@@ -355,7 +355,7 @@ class XROWRecurringOrderItem extends eZPersistentObject
     	return eZPersistentObject::fetchObjectList( XROWRecurringOrderItemOption::definition(), null, array( "item_id" => $this->item_id ) );
     }
 
-    function remove()
+    function remove( $conditions = null, $extraConditions = null )
     {
         foreach( $this->itemOptions() as $option )
         {

@@ -41,59 +41,60 @@ class XROWRecurringordersCommonFunctions
         }
         return $root;
     }
-
-    /*!
-     \static
-     This can be called like XROWRecurringordersCommonFunctions::createArrayfromXML( $xmlDoc )
-    */
-    static function createArrayfromXML( $xmlDoc )
+    /**
+     * This can be called like XROWRecurringordersCommonFunctions::createArrayfromXML( $xmlDoc )
+     */
+    static public function createArrayfromXML( $xmlDoc )
     {
-        $result = array();
-        $xml = new eZXML();
-        $dom = $xml->domTree( $xmlDoc );
-        if ( is_object( $dom ) )
-        {
-            $node = $dom->get_root();
-            $children = $node->children();
-            foreach ( $children as $child )
-            {
-                $contentnode = $child->firstChild();
-                if ( $contentnode->type === EZ_XML_NODE_TEXT )
-                {
-                    $result[$child->name()] = $contentnode->textContent();
-                }
-                else
-                {
-                    $result[$child->name()] = XROWRecurringordersCommonFunctions::createArrayfromDOMNODE( $child );
-                }
-            }
-        }
-        return $result;
+        return self::createArrayfromDOMNODE(simplexml_load_string( $xmlDoc ));
     }
-    /*!
-     \static
-     This can be called like XROWRecurringordersCommonFunctions::createArrayfromDOMNODE( $node )
-    */
-    static function createArrayfromDOMNODE( $node )
+    /**
+     * This can be called like XROWRecurringordersCommonFunctions::createArrayfromDOMNODE( $node )
+     */
+    static function createArrayfromDOMNODE( $xml )
     {
-        $result = array();
-        if ( is_object( $node ) )
-        {
-            $children = $node->children();
-            foreach ( $children as $child )
-            {
-                $contentnode = $child->firstChild();
-                if ( $contentnode->type === EZ_XML_NODE_TEXT )
-                {
-                    $result[$child->name()] = $contentnode->textContent();
-                }
-                else
-                {
-                    $result[$child->name()] = XROWRecurringordersCommonFunctions::createArrayfromDOMNODE( $child );
+    	
+        if ($xml instanceof SimpleXMLElement) {
+            $children = $xml->children();
+            $return = null;
+        }
+
+        foreach ($children as $element => $value) {
+            if ($value instanceof SimpleXMLElement) {
+                $values = (array)$value->children();
+
+                if (count($values) > 0) {
+                    if (is_array($return[$element])) {
+                        //hook
+                        foreach ($return[$element] as $k=>$v) {
+                            if (!is_int($k)) {
+                                $return[$element][0][$k] = $v;
+                                unset($return[$element][$k]);
+                            }
+                        }
+                        $return[$element][] = self::createArrayfromDOMNODE($value);
+                    } else {
+                        $return[$element] = self::createArrayfromDOMNODE($value);
+                    }
+                } else {
+                    if (!isset($return[$element])) {
+                        $return[$element] = (string)$value;
+                    } else {
+                        if (!is_array($return[$element])) {
+                            $return[$element] = array($return[$element], (string)$value);
+                        } else {
+                            $return[$element][] = (string)$value;
+                        }
+                    }
                 }
             }
         }
-        return $result;
+
+        if (is_array($return)) {
+            return $return;
+        } else {
+            return false;
+        }
     }
 }
 ?>
