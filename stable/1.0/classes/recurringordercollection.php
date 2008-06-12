@@ -11,7 +11,7 @@ define( 'XROWRECURRINGORDER_STATUS_ACTIVE', 1 );
 
 define( 'XROWRECURRINGORDER_STATUSTYPE_SUCCESS', 1 );
 define( 'XROWRECURRINGORDER_STATUSTYPE_CREDITCARD_EXPIRES', 2 );
-define( 'XROWRECURRINGORDER_STATUSTYPE_FAILURE', 2 );
+define( 'XROWRECURRINGORDER_STATUSTYPE_FAILURE', 3 );
 
 include_once( 'kernel/classes/ezpersistentobject.php' );
 include_once( 'lib/ezlocale/classes/ezdatetime.php');

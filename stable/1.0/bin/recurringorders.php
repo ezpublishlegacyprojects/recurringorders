@@ -145,18 +145,21 @@ foreach ( $list as $collection )
             if (  isset( $operationResult['redirect_url'] ) )
             {
                 $collection->addHistory( XROWRECURRINGORDER_STATUSTYPE_FAILURE, "Order has been processed with a strange result.", $order->ID);
-                continue;
+                $order->remove();
+                continue 2;
             }
             else if ( isset( $operationResult['result'] ) )
             {
                 $collection->addHistory( XROWRECURRINGORDER_STATUSTYPE_FAILURE, "Order has been processed with a strange result.", $order->ID);
-                continue;
+                $order->remove();
+                continue 2;
             }
         }break;
         case EZ_MODULE_OPERATION_CANCELED:
         {
             $collection->addHistory( XROWRECURRINGORDER_STATUSTYPE_FAILURE, "Order has been CANCELED.", $order->ID);
-            continue;
+            $order->remove();
+            continue 2;
         }
     }
 
