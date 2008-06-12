@@ -79,7 +79,8 @@ class XROWRecurringOrderItem extends eZPersistentObject
                       "keys" => array( "item_id" ),
                       "increment_key" => "item_id",
                       "function_attributes" => array(
-                                                        "collection" => "collection",
+                                                        "period_start_date" => "periodStartDate",
+                      									"collection" => "collection",
                                                         "object" => "object",
                                                         'days_in_cycle' => 'daysInCycle',
                                                         "price_per_item" => "pricePerItem",
@@ -95,7 +96,11 @@ class XROWRecurringOrderItem extends eZPersistentObject
     {
     	return XROWRecurringOrderCollection::fetch( $this->collection_id );
     }
-
+    function periodStartDate()
+    {
+    	return $this->previousDateHelper( $this->next_date );
+    }
+    
     function &attribute( $name )
     {
         switch ( $name )
@@ -250,7 +255,37 @@ class XROWRecurringOrderItem extends eZPersistentObject
         }
         return $days;
     }
-
+    function previousDateHelper( $time )
+    {
+        $datetime = new eZDateTime( $time );
+        if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_MONTH )
+        {
+                $datetime->setMonth( $datetime->month() - $this->cycle );
+                $datetime->setDay( $datetime->day() );
+        }
+        else if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_DAY )
+        {
+                $datetime->setMonth( $datetime->month() );
+                $datetime->setDay( $datetime->day() - $this->cycle );
+        }
+        else if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_WEEK )
+        {
+                $datetime->setMonth( $datetime->month() );
+                $datetime->setDay( $datetime->day() - ( $this->cycle * 7 ) );
+        }
+        else if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_QUARTER )
+        {
+                $datetime->setMonth( $datetime->month() - ( $this->cycle * 3 ) );
+                $datetime->setDay( $datetime->day() );
+        }
+        else if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_YEAR )
+        {
+                $datetime->setYear( $datetime->year() -  $this->cycle );
+                $datetime->setMonth( $datetime->month() );
+                $datetime->setDay( $datetime->day() );
+        }
+        return $datetime->timeStamp();
+    }
     function nextDateHelper( $time )
     {
         $datetime = new eZDateTime( $time );

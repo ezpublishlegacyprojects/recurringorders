@@ -202,6 +202,10 @@
         <source>We have encountered problems with your credit card. Please update your profile.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>(period %startdate% till %enddate%)</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>kernel/classes/datatypes</name>

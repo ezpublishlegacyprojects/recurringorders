@@ -3,57 +3,57 @@
     <name>content/datatype/edit/xrowbillingcycle</name>
     <message>
         <source>Quantity</source>
-        <translation type="unfinished"></translation>
+        <translation>Anzahl</translation>
     </message>
     <message>
         <source>Period</source>
-        <translation type="unfinished"></translation>
+        <translation>Dauer</translation>
     </message>
 </context>
 <context>
     <name>design/admin/parts/visual/menu</name>
     <message>
         <source>Recurring orders</source>
-        <translation type="unfinished"></translation>
+        <translation>Dauerauftrge</translation>
     </message>
 </context>
 <context>
     <name>design/admin/shop/customerlist</name>
     <message>
         <source>Forecast [%forecast]</source>
-        <translation type="unfinished"></translation>
+        <translation>Ausstehend [%forecast]</translation>
     </message>
     <message>
         <source>The forecast list is empty.</source>
-        <translation type="unfinished"></translation>
+        <translation>Es sind keine Kosten angefallen.</translation>
     </message>
     <message>
         <source>Messages [%history]</source>
-        <translation type="unfinished"></translation>
+        <translation>Nachrichten [%history]</translation>
     </message>
     <message>
         <source>Text</source>
-        <translation type="unfinished"></translation>
+        <translation>Text</translation>
     </message>
     <message>
         <source>Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Typ</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation type="unfinished"></translation>
+        <translation>Datum</translation>
     </message>
     <message>
         <source>Order ID</source>
-        <translation type="unfinished"></translation>
+        <translation>Auftragsnummer</translation>
     </message>
     <message>
         <source>Collection ID</source>
-        <translation type="unfinished"></translation>
+        <translation>Einzugsnummer</translation>
     </message>
     <message>
         <source>User ID</source>
-        <translation type="unfinished"></translation>
+        <translation>Benutzer ID</translation>
     </message>
     <message>
         <source>The message list is empty.</source>
@@ -64,73 +64,73 @@
     <name>design/admin/shop/discountgroupmembershipview</name>
     <message>
         <source>Total recurring forecast on revenue</source>
-        <translation type="unfinished"></translation>
+        <translation>Gesammtbetrag der ausstehenden Kosten</translation>
     </message>
 </context>
 <context>
     <name>design/standard/class/datatype</name>
     <message>
         <source>using payment gateway</source>
-        <translation type="unfinished"></translation>
+        <translation>gewhlte Zahlungsmethode</translation>
     </message>
     <message>
         <source>disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>gesperrt</translation>
     </message>
 </context>
 <context>
     <name>design/standard/content/datatype</name>
     <message>
         <source>Current stored card</source>
-        <translation type="unfinished"></translation>
+        <translation>Gespeicherte Karteninformationen</translation>
     </message>
     <message>
         <source>Account number</source>
-        <translation type="unfinished"></translation>
+        <translation>Accountnummer</translation>
     </message>
     <message>
         <source>Bank code</source>
-        <translation type="unfinished"></translation>
+        <translation>Bankleitzahl</translation>
     </message>
     <message>
         <source>Remove debit card</source>
-        <translation type="unfinished"></translation>
+        <translation>Lastschriftdaten entfernen</translation>
     </message>
     <message>
         <source>expires</source>
-        <translation type="unfinished"></translation>
+        <translation>gltig bis</translation>
     </message>
     <message>
         <source>Card type</source>
-        <translation type="unfinished"></translation>
+        <translation>Kartentyp</translation>
     </message>
     <message>
         <source>Name on card</source>
-        <translation type="unfinished"></translation>
+        <translation>Name der Karte</translation>
     </message>
     <message>
         <source>Security Code</source>
-        <translation type="unfinished"></translation>
+        <translation>Sicherheitscode</translation>
     </message>
     <message>
         <source>Help</source>
-        <translation type="unfinished"></translation>
+        <translation>Hilfe</translation>
     </message>
     <message>
         <source>Month</source>
-        <translation type="unfinished"></translation>
+        <translation>Monat</translation>
     </message>
     <message>
         <source>Year</source>
-        <translation type="unfinished"></translation>
+        <translation>Jahr</translation>
     </message>
     <message>
         <source>Name of account</source>
-        <translation type="unfinished"></translation>
+        <translation>Name des Accounts</translation>
     </message>
     <message>
         <source>No card stored.</source>
-        <translation type="unfinished"></translation>
+        <translation>Keine Karteninformationen gespeichert</translation>
     </message>
     <message>
         <source>Remove credit card</source>
@@ -145,102 +145,106 @@
     <name>design/standard/shop</name>
     <message>
         <source>Billing Address</source>
-        <translation type="unfinished"></translation>
+        <translation>Rechnungsadresse</translation>
     </message>
     <message>
         <source>Shipping and Billing Address</source>
-        <translation type="unfinished"></translation>
+        <translation>Liefer- und Rechnugnsadresse</translation>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Name</translation>
     </message>
     <message>
         <source>Email</source>
-        <translation type="unfinished"></translation>
+        <translation>E-Mail</translation>
     </message>
     <message>
         <source>Address</source>
-        <translation type="unfinished"></translation>
+        <translation>Adresse</translation>
     </message>
     <message>
         <source>City</source>
-        <translation type="unfinished"></translation>
+        <translation>Ort</translation>
     </message>
     <message>
         <source>State</source>
-        <translation type="unfinished"></translation>
+        <translation>Bundesland</translation>
     </message>
     <message>
         <source>Zip code</source>
-        <translation type="unfinished"></translation>
+        <translation>Postleitzahl</translation>
     </message>
     <message>
         <source>Country</source>
-        <translation type="unfinished"></translation>
+        <translation>Land</translation>
     </message>
     <message>
         <source>Phone</source>
-        <translation type="unfinished"></translation>
+        <translation>Telefon</translation>
     </message>
     <message>
         <source>Shipping</source>
-        <translation type="unfinished"></translation>
+        <translation>Leiferung</translation>
     </message>
     <message>
         <source>Shipping Address</source>
-        <translation type="unfinished"></translation>
+        <translation>Lieferadresse</translation>
     </message>
 </context>
 <context>
     <name>extension/recurringorders</name>
     <message>
         <source>Your input has been stored.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ihre Eingaben wurden gespeichert.</translation>
     </message>
     <message>
         <source>We have encountered problems with your credit card. Please update your profile.</source>
+        <translation>Ihre Kreditkartendaten konntent nicht besttigt werden. Aktualisieren Sie Ihr Profil.</translation>
+    </message>
+    <message>
+        <source>(period %startdate% till %enddate%)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>kernel/classes/datatypes</name>
     <message>
+        <source>Input is required, if you have active subscriptions or recurring orders.</source>
+        <translation>Eingabe ist erforderlich, falls Sie laufende Bestellungen oder ausstehende Kosten haben.</translation>
+    </message>
+    <message>
         <source>Input required.</source>
-        <translation type="unfinished"></translation>
+        <translation>Eingabe erforderlich</translation>
     </message>
     <message>
         <source>Mastercard</source>
-        <translation type="unfinished"></translation>
+        <translation>Mastercard</translation>
     </message>
     <message>
         <source>Visa</source>
-        <translation type="unfinished"></translation>
+        <translation>Visa</translation>
     </message>
     <message>
         <source>Discover</source>
-        <translation type="unfinished"></translation>
+        <translation>Discover</translation>
     </message>
     <message>
         <source>American Express</source>
-        <translation type="unfinished"></translation>
+        <translation>American Express</translation>
     </message>
     <message>
         <source>Debit card</source>
-        <translation type="unfinished"></translation>
+        <translation>Lastschrift</translation>
     </message>
     <message>
         <source>Billing cycle</source>
         <comment>Datatype name</comment>
-        <translation type="unfinished"></translation>
+        <translation>Abrechnungszyklus</translation>
     </message>
     <message>
         <source>Credit card</source>
         <comment>Datatype name</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Input is required, if you have active subscriptions or recurring orders.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -248,94 +252,94 @@
     <name>kernel/classes/recurringordercollection</name>
     <message>
         <source>one time</source>
-        <translation type="unfinished"></translation>
+        <translation>einmalig</translation>
     </message>
     <message>
         <source>day(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Tag(e)</translation>
     </message>
     <message>
         <source>weeks(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Woche(n)</translation>
     </message>
     <message>
         <source>month(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Monat(e)</translation>
     </message>
     <message>
         <source>quarter(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Quartal(e)</translation>
     </message>
     <message>
         <source>year(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Jahr(e)</translation>
     </message>
     <message>
         <source>daily</source>
-        <translation type="unfinished"></translation>
+        <translation>tglich</translation>
     </message>
     <message>
         <source>weekly</source>
-        <translation type="unfinished"></translation>
+        <translation>wchentlich</translation>
     </message>
     <message>
         <source>monthly</source>
-        <translation type="unfinished"></translation>
+        <translation>monatlich</translation>
     </message>
     <message>
         <source>quarterly</source>
-        <translation type="unfinished"></translation>
+        <translation>vierteljhrig</translation>
     </message>
     <message>
         <source>yearly</source>
-        <translation type="unfinished"></translation>
+        <translation>jhrlich</translation>
     </message>
     <message>
         <source>days</source>
-        <translation type="unfinished"></translation>
+        <translation>Tage</translation>
     </message>
     <message>
         <source>day</source>
-        <translation type="unfinished"></translation>
+        <translation>Tag</translation>
     </message>
     <message>
         <source>weeks</source>
-        <translation type="unfinished"></translation>
+        <translation>Wochen</translation>
     </message>
     <message>
         <source>week</source>
-        <translation type="unfinished"></translation>
+        <translation>Woche</translation>
     </message>
     <message>
         <source>months</source>
-        <translation type="unfinished"></translation>
+        <translation>Monate</translation>
     </message>
     <message>
         <source>month</source>
-        <translation type="unfinished"></translation>
+        <translation>Monat</translation>
     </message>
     <message>
         <source>quarters</source>
-        <translation type="unfinished"></translation>
+        <translation>Quartale</translation>
     </message>
     <message>
         <source>quarter</source>
-        <translation type="unfinished"></translation>
+        <translation>Quartal</translation>
     </message>
     <message>
         <source>years</source>
-        <translation type="unfinished"></translation>
+        <translation>Jahre</translation>
     </message>
     <message>
         <source>year</source>
-        <translation type="unfinished"></translation>
+        <translation>Jahr</translation>
     </message>
 </context>
 <context>
     <name>standard/datatype/ezcreditcard</name>
     <message>
         <source>Not used</source>
-        <translation type="unfinished"></translation>
+        <translation>Nicht genutzt</translation>
     </message>
 </context>
 </TS>
