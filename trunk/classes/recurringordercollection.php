@@ -204,13 +204,22 @@ class XROWRecurringOrderCollection extends eZPersistentObject
                         $priceFound = true;
                     }
                 }
+                $name = $object->attribute( 'name' );
             }
             else
             {
                 $price = $handler->getPrice();
+                $name = $handler->getName();
+            }
+            if( $recurringitem->is_subscription and $recurringitem->cycle_unit != XROWRECURRINGORDER_CYCLE_ONETIME )
+            {
+                $ts_args = array();
+                $ts_args['%startdate%'] = strftime( '%d.%m.%y', $recurringitem->periodStartDate() );
+                $ts_args['%enddate%'] = strftime( '%d.%m.%y', $recurringitem->attribute( 'next_date' ) );
+                $name .= ' ' . ezi18n( 'extension/recurringorders', "(period %startdate% till %enddate%)", false, $ts_args );
             }
             $item = eZProductCollectionItem::create( $productCollectionID );
-            $item->setAttribute( 'name', $object->attribute( 'name' ) );
+            $item->setAttribute( 'name', $name );
             $item->setAttribute( "contentobject_id", $object->attribute( 'id' ) );
             $item->setAttribute( "item_count", $recurringitem->attribute( 'amount' ) );
             $item->setAttribute( "price", $price );
