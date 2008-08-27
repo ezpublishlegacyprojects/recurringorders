@@ -23,6 +23,18 @@ $ViewList["list"] = array(
                                         ),
             'params' => array( 'CollectionID' ),
             'script' => 'list.php' );
+$ViewList['listitems'] = array(
+    "default_navigation_part" => 'xrowrecurringorders',
+            'single_post_actions' => array( 'Cancel' => 'Cancel',
+                                            'Update' => 'Update' ),
+            'post_action_parameters' => array( 
+                                            'Cancel' => array( ),
+                                            'Update' => array( 
+                                                                'ItemArray' => 'ItemArray'
+                                                             )
+                                                                                                     ),
+    'functions' => array( 'administrate' ),
+    'script' => 'listitems.php' );
 $ViewList['history'] = array(
     "default_navigation_part" => 'xrowrecurringorders',
     'functions' => array( 'administrate' ),

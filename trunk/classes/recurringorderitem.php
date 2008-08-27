@@ -79,6 +79,8 @@ class XROWRecurringOrderItem extends eZPersistentObject
                       "function_attributes" => array(
                                                         "period_start_date" => "periodStartDate",
                       									"collection" => "collection",
+                                        				"user" => "user",
+                                        				"name" => "name",
                                                         "object" => "object",
                                                         'days_in_cycle' => 'daysInCycle',
                                                         "price_per_item" => "pricePerItem",
@@ -89,6 +91,11 @@ class XROWRecurringOrderItem extends eZPersistentObject
                       "sort" => array( "created" => "asc" ),
                       "name" => "xrow_recurring_order_item" );
     }
+    function user()
+    {
+    	$col = $this->collection();
+    	return $col->user();
+    }
     
     function collection()
     {
@@ -97,6 +104,11 @@ class XROWRecurringOrderItem extends eZPersistentObject
     function periodStartDate()
     {
     	return $this->previousDateHelper( $this->next_date );
+    }
+    function attributes()
+    {
+    	$att = parent::attributes();
+    	return array_merge( $att, array( 'content', 'handler', 'last_run' ) );
     }
     
     function attribute( $attr, $noFunction = false )
@@ -224,7 +236,10 @@ class XROWRecurringOrderItem extends eZPersistentObject
     {
         return $this->forwardNextDate( XROWRecurringOrderCollection::now() );
     }
-
+    function previousDate()
+    {
+    	return $this->previousDateHelper( $this->next_date );
+    }
     function daysInCycle()
     {
     	if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_DAY )
@@ -253,6 +268,13 @@ class XROWRecurringOrderItem extends eZPersistentObject
         }
         return $days;
     }
+    function count()
+    {
+    	$db = eZDB::instance();
+    	$result = $db->arrayQuery("SELECT count( item_id ) as counter FROM xrow_recurring_order_item");
+    	return (int)$result[0]['counter'];
+    }
+    
     function previousDateHelper( $time )
     {
         $datetime = new eZDateTime( $time );
@@ -319,10 +341,22 @@ class XROWRecurringOrderItem extends eZPersistentObject
 
     function isDue()
     {
+    	if ( $this->status != XROWRECURRINGORDER_STATUS_ACTIVE )
+    	{
+    		return false;
+    	}
         if ( $this->next_date < XROWRecurringOrderCollection::now() )
+        {
+        	if ( $this->cycle_unit == XROWRECURRINGORDER_CYCLE_ONETIME and $this->last_success )
+        	{
+        		return false;
+        	}
             return true;
+        }
         else
+        {
             return false;
+        }
     }
 
     function object()
@@ -330,7 +364,12 @@ class XROWRecurringOrderItem extends eZPersistentObject
         $object = eZContentObject::fetch( $this->contentobject_id );
         return $object;
     }
-
+    function fetchAll( $offset, $limit )
+    {
+    	$limit = array( 'offset' => $offset, 'limit' => $limit );
+        return eZPersistentObject::fetchObjectList( XROWRecurringOrderItem::definition(),
+                null, null, array( 'created' => 'desc' ),$limit );
+    }
     function fetch( $item_id )
     {
         return eZPersistentObject::fetchObject( XROWRecurringOrderItem::definition(),
@@ -339,11 +378,20 @@ class XROWRecurringOrderItem extends eZPersistentObject
 
     function price()
     {
-        return $this->pricePerItem() * $this->amount;
+    	$handler = $this->attribute( 'handler' );
+    	if ( !$handler )
+    	{
+    		return $this->pricePerItem() * $this->amount;
+        }
+        else
+        {
+        	return $handler->getPrice();
+        }
     }
 
     function pricePerItem()
     {
+    	$price = 0;
         $currency = eZShopFunctions::preferredCurrencyCode();
         $object = $this->attribute( 'object' );
         $attributes = $object->contentObjectAttributes();
