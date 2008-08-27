@@ -8,6 +8,7 @@
 
 
   <ul>
+    <li><div><a href={"/recurringorders/listitems"|ezurl}>List subscriptions</a></div></li>
     <li><div><a href={"/recurringorders/forecast"|ezurl}>Forecast</a></div></li>
     <li><div><a href={"/recurringorders/history"|ezurl}>History</a></div></li>
   </ul>
