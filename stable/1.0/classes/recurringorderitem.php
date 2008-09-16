@@ -343,7 +343,11 @@ class XROWRecurringOrderItem extends eZPersistentObject
 
     function isDue()
     {
-    	if ( $this->status != XROWRECURRINGORDER_STATUS_ACTIVE )
+    	if ( $this->is_subscription == 1 and $this->status != XROW_SUBSCRIPTION_STATUS_ACTIVE )
+    	{
+    		return false;
+    	}
+        if ( $this->is_subscription == 0 and $this->status != XROWRECURRINGORDER_STATUS_ACTIVE )
     	{
     		return false;
     	}
@@ -366,11 +370,11 @@ class XROWRecurringOrderItem extends eZPersistentObject
         $object = eZContentObject::fetch( $this->contentobject_id );
         return $object;
     }
-    function fetchAll( $offset, $limit )
+    function fetchAllSubscriptions( $offset, $limit )
     {
     	$limit = array( 'offset' => $offset, 'limit' => $limit );
         return eZPersistentObject::fetchObjectList( XROWRecurringOrderItem::definition(),
-                null, null, array( 'created' => 'desc' ),$limit );
+                null, array( 'is_subscription' => 1 ), array( 'created' => 'desc' ),$limit );
     }
     function fetch( $item_id )
     {

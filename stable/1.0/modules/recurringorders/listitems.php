@@ -32,7 +32,7 @@ if ( $Module->isCurrentAction( 'Update' ) and $Module->hasActionParameter( 'Item
         {
         	if ( $attributes['status'] )
         	{
-        		$item->setAttribute( 'status', XROWRECURRINGORDER_STATUS_ACTIVE );
+        		$item->setAttribute( 'status', XROW_SUBSCRIPTION_STATUS_ACTIVE );
         		if( $attributes['refund'] )
         		{
         			$item->setAttribute( 'last_success', $item->previousDate() );
@@ -40,7 +40,7 @@ if ( $Module->isCurrentAction( 'Update' ) and $Module->hasActionParameter( 'Item
         	}
         	else
         	{
-        		$item->setAttribute( 'status', XROWRECURRINGORDER_STATUS_DEACTIVATED );
+        		$item->setAttribute( 'status', XROW_SUBSCRIPTION_STATUS_UNDEFINED );
         	}
         	$item->store();
         }
@@ -52,7 +52,7 @@ if ( $Module->isCurrentAction( 'Cancel' ) )
 {
     return $Module->redirectTo( $http->sessionVariable( "RedirectURI" ));
 }
-$items = XROWRecurringOrderItem::fetchAll( $offset, $limit);
+$items = XROWRecurringOrderItem::fetchAllSubscriptions( $offset, $limit);
 
 $tpl->setVariable( '$messages', $messages );
 $tpl->setVariable( 'view_parameters', $viewParameters );

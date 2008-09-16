@@ -50,8 +50,15 @@
     </td>
     <td class="tight" align="right">
     <select name="ItemArray[{$item.item_id}][status]">
-    <option value="1" {if $item.status}selected{/if}>Activated</option>
-    <option value="0" {if $item.status|not}selected{/if}>Deactivated</option>
+    <option value="0" {if $item.status|eq(0)}selected{/if}>Deactivated</option>
+    <option value="1" disabled="disabled" {if $item.status|eq(1)}selected{/if}>Trial</option>
+    <option value="2" {if $item.status|eq(2)}selected{/if}>Activated</option>
+    <option value="3" disabled="disabled" {if $item.status|eq(3)}selected{/if}>SUSPENDED</option>
+    <option value="4" disabled="disabled" {if $item.status|eq(4)}selected{/if}>OVERDUE</option>
+    <option value="5" disabled="disabled" {if $item.status|eq(5)}selected{/if}>CANCELED</option>
+    <option value="6" disabled="disabled" {if $item.status|eq(6)}selected{/if}>DELETED</option>
+    <option value="8" disabled="disabled" {if $item.status|eq(7)}selected{/if}>NOT_SUBSCRIPED</option>
+    <option value="9" disabled="disabled" {if $item.status|eq(8)}selected{/if}>INIT_ACTIVE</option>
     </select>
     {if $item.status|not}<label><input name="ItemArray[{$item.item_id}][refund]" value="1" type="checkbox" />Refund till current cycle</label>{/if}
     </td>
