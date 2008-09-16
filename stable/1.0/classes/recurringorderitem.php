@@ -400,6 +400,10 @@ class XROWRecurringOrderItem extends eZPersistentObject
     	$price = 0;
         $currency = eZShopFunctions::preferredCurrencyCode();
         $object = $this->attribute( 'object' );
+        if ( !is_object( $object ) )
+        {
+        	return false;
+        }
         $attributes = $object->contentObjectAttributes();
 
         foreach ( $attributes as $attribute )
