@@ -49,7 +49,6 @@
     {$item.price|l10n( 'currency' )}
     </td>
     <td class="tight" align="right">
-
     <select name="ItemArray[{$item.item_id}][status]">
     <option value="0" {if $item.status|eq('0')}selected{/if}>Deactivated</option>
     <option value="1" disabled="disabled" {if $item.status|eq('1')}selected{/if}>Trial</option>
